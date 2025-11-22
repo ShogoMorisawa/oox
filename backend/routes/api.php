@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Services\CalculateService;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -16,6 +17,11 @@ Route::get('/hello', function () {
 
 Route::post('/calculate', function (Request $request) {
     $matches = $request->input('matches');
+
+    $service = new CalculateService();
+    $graph = $service->buildGraph($matches);
+    logger()->info('Generated Graph:', $graph);
+
     $mockResponse = [
         'order' => [
             'Ni',
