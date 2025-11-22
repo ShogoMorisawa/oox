@@ -14,7 +14,8 @@ Route::get('/hello', function () {
     ]);
 });
 
-Route::get('/calculate', function (Request $request) {
+Route::post('/calculate', function (Request $request) {
+    $matches = $request->input('matches');
     $mockResponse = [
         'order' => [
             'Ni',
