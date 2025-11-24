@@ -5,10 +5,15 @@ namespace App\Services;
 class CalculateService
 {
     protected array $ids = [];
+
     protected array $low = [];
+
     protected array $onStack = [];
+
     protected array $stack = [];
+
     protected int $timer = 0;
+
     protected array $sccs = [];
 
     public function buildGraph(array $matches): array
@@ -53,6 +58,7 @@ class CalculateService
 
     protected function dfsTarjan(string $at, array $graph): void
     {
+        // 初回訪問で id/low を同じ値にセットし、スタックに積む
         $this->ids[$at] = $this->low[$at] = $this->timer++;
         $this->stack[] = $at;
         $this->onStack[$at] = true;
@@ -60,13 +66,16 @@ class CalculateService
         foreach ($graph[$at] as $to) {
             if (! isset($this->ids[$to])) {
                 $this->dfsTarjan($to, $graph);
+                // 子が見つけた「より古い」ノード情報で low を更新
                 $this->low[$at] = min($this->low[$at], $this->low[$to]);
             } elseif (! empty($this->onStack[$to])) {
+                // スタック上への戻り辺があれば ids で low を更新
                 $this->low[$at] = min($this->low[$at], $this->ids[$to]);
             }
         }
 
         if ($this->ids[$at] === $this->low[$at]) {
+            // 自分が強連結成分の根なら、根に戻るまでスタックを取り出す
             $scc = [];
             while (true) {
                 $node = array_pop($this->stack);
