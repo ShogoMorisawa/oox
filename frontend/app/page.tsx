@@ -19,6 +19,27 @@ const MOCK_MATCHES = [
   // ... 実際は28件分をここに定義
 ];
 
+const COMPLEX_MOCK_MATCHES = [
+  // 🥇 支配ノード (Ni, Ti)
+  { winner: "Ni", loser: "Ti", id: "q01" },
+  { winner: "Ni", loser: "Ne", id: "q02" },
+  // 🔗 支配ノードからサイクルへ
+  { winner: "Ti", loser: "Fe", id: "q03" },
+  { winner: "Ti", loser: "Fi", id: "q04" },
+  // 🔄 循環 (葛藤ブロック: Fe, Fi, Te)
+  { winner: "Fe", loser: "Fi", id: "q05" },
+  { winner: "Fi", loser: "Te", id: "q06" },
+  { winner: "Te", loser: "Fe", id: "q07" }, // ⬅️ これがサイクルを形成する
+  // 🔗 サイクルから従属ノードへ
+  { winner: "Fe", loser: "Se", id: "q08" },
+  // 🥈 中間ノード (Ne)
+  { winner: "Ne", loser: "Se", id: "q09" },
+  // 🥉 従属ノード (Si, Se)
+  { winner: "Se", loser: "Si", id: "q10" },
+  { winner: "Ti", loser: "Si", id: "q11" },
+  { winner: "Ni", loser: "Si", id: "q12" },
+];
+
 // Responseの型
 type OrderElement = FunctionCode | FunctionCode[];
 type CalculateResponse = {
@@ -43,7 +64,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ matches: MOCK_MATCHES }),
+        body: JSON.stringify({ matches: COMPLEX_MOCK_MATCHES }),
       });
 
       if (!res.ok) {
@@ -136,12 +157,19 @@ export default function Home() {
                 強連結成分 (SCC)
               </h2>
               {sccs.length === 0 ? (
-                <p className="text-gray-600 text-sm">SCC は検出されていません。</p>
+                <p className="text-gray-600 text-sm">
+                  SCC は検出されていません。
+                </p>
               ) : (
                 <ul className="space-y-3">
                   {sccs.map((component, idx) => (
-                    <li key={idx} className="p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg shadow-sm">
-                      <div className="text-xs text-gray-500 mb-1">SCC #{idx + 1}</div>
+                    <li
+                      key={idx}
+                      className="p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg shadow-sm"
+                    >
+                      <div className="text-xs text-gray-500 mb-1">
+                        SCC #{idx + 1}
+                      </div>
                       <div className="flex flex-wrap gap-2">
                         {component.map((func, i) => (
                           <span
@@ -163,12 +191,16 @@ export default function Home() {
                 グラフ (隣接リスト)
               </h2>
               {Object.keys(graph).length === 0 ? (
-                <p className="text-gray-600 text-sm">グラフ情報がありません。</p>
+                <p className="text-gray-600 text-sm">
+                  グラフ情報がありません。
+                </p>
               ) : (
                 <ul className="space-y-2">
                   {Object.entries(graph).map(([node, edges]) => (
                     <li key={node} className="flex items-start gap-2">
-                      <span className="font-mono text-sm text-gray-700">{node}</span>
+                      <span className="font-mono text-sm text-gray-700">
+                        {node}
+                      </span>
                       <span className="text-gray-500">→</span>
                       <div className="flex flex-wrap gap-2">
                         {edges.map((edge, i) => (
