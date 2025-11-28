@@ -22,11 +22,11 @@ class DescribeService
 
             return $this->parseGeminiOutput($fullText);
         } catch (Exception $e) {
-            Log::error('Gemini error: '.$e->getMessage());
+            Log::error('Gemini API Error: '.$e->getMessage());
 
             return [
-                'title' => '解析エラー',
-                'description' => '申し訳ありません。現在AIとの通信が混み合っており、解析文を生成できませんでした。',
+                'title' => 'Error Debug',
+                'description' => $e->getMessage(),
             ];
         }
     }
