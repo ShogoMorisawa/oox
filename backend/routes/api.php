@@ -1,6 +1,7 @@
 <?php
 
 use App\Services\CalculateService;
+use App\Services\DescribeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -23,4 +24,15 @@ Route::post('/calculate', function (Request $request, CalculateService $service)
     $order = $service->getFinalOrder($matches);
 
     return response()->json(compact('order'));
+});
+
+Route::post('/describe', function (Request $request, DescribeService $service) {
+    $finalOrder = $request->json('finalOrder', []);
+    $healthStatus = $request->json('healthStatus', []);
+    $tierMap = $request->json('tierMap', []);
+
+    $result = $service->generateDescription($finalOrder, $healthStatus, $tierMap);
+    logger()->info('Describe result:', $result);
+
+    return response()->json($result);
 });
