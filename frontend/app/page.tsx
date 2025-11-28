@@ -18,40 +18,6 @@ type Question = {
   text: string;
 };
 
-// 28件のダミーデータ（ここでは簡略化のため8件だけ記載）
-const MOCK_MATCHES = [
-  { winner: "Ni", loser: "Se", id: "q01" },
-  { winner: "Ti", loser: "Fe", id: "q02" },
-  { winner: "Fi", loser: "Te", id: "q03" },
-  { winner: "Ne", loser: "Si", id: "q04" },
-  { winner: "Ni", loser: "Fi", id: "q05" },
-  { winner: "Se", loser: "Ti", id: "q06" },
-  { winner: "Te", loser: "Ne", id: "q07" },
-  { winner: "Fe", loser: "Si", id: "q08" },
-  // ... 実際は28件分をここに定義
-];
-
-const COMPLEX_MOCK_MATCHES = [
-  // 🥇 支配ノード (Ni, Ti)
-  { winner: "Ni", loser: "Ti", id: "q01" },
-  { winner: "Ni", loser: "Ne", id: "q02" },
-  // 🔗 支配ノードからサイクルへ
-  { winner: "Ti", loser: "Fe", id: "q03" },
-  { winner: "Ti", loser: "Fi", id: "q04" },
-  // 🔄 循環 (葛藤ブロック: Fe, Fi, Te)
-  { winner: "Fe", loser: "Fi", id: "q05" },
-  { winner: "Fi", loser: "Te", id: "q06" },
-  { winner: "Te", loser: "Fe", id: "q07" }, // ⬅️ これがサイクルを形成する
-  // 🔗 サイクルから従属ノードへ
-  { winner: "Fe", loser: "Se", id: "q08" },
-  // 🥈 中間ノード (Ne)
-  { winner: "Ne", loser: "Se", id: "q09" },
-  // 🥉 従属ノード (Si, Se)
-  { winner: "Se", loser: "Si", id: "q10" },
-  { winner: "Ti", loser: "Si", id: "q11" },
-  { winner: "Ni", loser: "Si", id: "q12" },
-];
-
 const QUESTIONS: Question[] = [
   // --- Ni ---
   {
