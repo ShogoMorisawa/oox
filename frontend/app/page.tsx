@@ -358,7 +358,7 @@ export default function Home() {
         </button>
 
         {/* 結果表示 */}
-        {result && (
+        {result && result.order && (
           <div className="border-t pt-4">
             <h2 className="text-xl font-semibold mb-3">結果序列</h2>
             <ol className="space-y-2">
