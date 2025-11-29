@@ -79,7 +79,7 @@ const BASE_URL = "https://6cs4ipgnf9.execute-api.ap-northeast-1.amazonaws.com"; 
 
 export default function Home() {
   // --- State ---
-  const [step, setStep] = useState<"quiz" | "result">("quiz"); // 画面切り替え用
+  const [step, setStep] = useState<"quiz" | "resolve" | "result">("quiz"); // 画面切り替え用
 
   const [answers, setAnswers] = useState<Record<string, FunctionCode>>(() => {
     const initial: Record<string, FunctionCode> = {};
@@ -95,6 +95,9 @@ export default function Home() {
 
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
+  const [conflictBlock, setConflictBlock] = useState<FunctionCode[]>([]);
+  const [resolvedBlock, setResolvedBlock] = useState<FunctionCode[]>([]);
+  const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
 
   // --- Handlers ---
 
@@ -107,12 +110,27 @@ export default function Home() {
     setLoading(true);
     setLoadingMessage("思考回路を解析中...");
     setCalculateResult(null);
+    setResolvedBlock([]);
 
-    const matches = QUESTIONS.map((q) => ({
-      id: q.id,
-      winner: answers[q.id],
-      loser: answers[q.id] === q.left ? q.right : q.left,
-    }));
+    // const matches = QUESTIONS.map((q) => ({
+    //   id: q.id,
+    //   winner: answers[q.id],
+    //   loser: answers[q.id] === q.left ? q.right : q.left,
+    // }));
+
+    const matches = [
+      { winner: "Ni", loser: "Ti", id: "q01" },
+      { winner: "Ni", loser: "Ne", id: "q02" },
+      { winner: "Ti", loser: "Fe", id: "q03" },
+      { winner: "Ti", loser: "Fi", id: "q04" },
+      // 🌀 ここで矛盾ループ (Fe > Fi > Te > Fe)
+      { winner: "Fe", loser: "Fi", id: "q05" },
+      { winner: "Fi", loser: "Te", id: "q06" },
+      { winner: "Te", loser: "Fe", id: "q07" },
+      // その他
+      { winner: "Fe", loser: "Se", id: "q08" },
+      { winner: "Se", loser: "Si", id: "q10" },
+    ];
 
     try {
       const res = await fetch(`${BASE_URL}/api/calculate`, {
@@ -125,8 +143,20 @@ export default function Home() {
       const data: CalculateResponse = await res.json();
       setCalculateResult(data);
 
-      // 計算が終わったら、すぐにGemini分析へ進む (MVPショートカット)
-      await handleDescribe(data.order);
+      // 葛藤ブロック（配列）があるか探す
+      const conflictIndex = data.order.findIndex((el) => Array.isArray(el));
+      const hasConflict = conflictIndex !== -1;
+
+      if (hasConflict) {
+        const block = data.order[conflictIndex] as FunctionCode[];
+        setConflictBlock(block);
+        setCurrentBlockIndex(conflictIndex);
+        setStep("resolve"); // 解決画面へ
+        setLoading(false); // 一旦ロード解除
+      } else {
+        // 葛藤がなければそのまま分析へ
+        await handleDescribe(data.order as FunctionCode[]);
+      }
     } catch (e) {
       console.error(e);
       alert("計算エラーが発生しました");
@@ -134,12 +164,53 @@ export default function Home() {
     }
   };
 
+  // 選択肢をクリックしたときの処理
+  const handleSelectOrder = (func: FunctionCode) => {
+    if (resolvedBlock.includes(func)) return;
+    setResolvedBlock([...resolvedBlock, func]);
+  };
+
+  // リセットボタン（間違えたとき用）
+  const handleResetConflict = () => {
+    setResolvedBlock([]);
+  };
+
+  // 決定して次へ進む処理
+  const handleConfirmConflict = async () => {
+    if (!calculateResult) return;
+
+    // 今の order をコピー
+    const newOrder = [...calculateResult.order];
+
+    // 現在の葛藤箇所に resolvedBlock を埋め込む
+    const conflictIndex = newOrder.findIndex((el) => Array.isArray(el));
+
+    if (conflictIndex !== -1) {
+      newOrder.splice(conflictIndex, 1, ...resolvedBlock);
+
+      // 状態更新
+      setCalculateResult({ ...calculateResult, order: newOrder });
+      setResolvedBlock([]);
+
+      // 次の葛藤を探す
+      const nextConflictIndex = newOrder.findIndex((el) => Array.isArray(el));
+      if (nextConflictIndex !== -1) {
+        const block = newOrder[nextConflictIndex] as FunctionCode[];
+        setConflictBlock(block);
+        setCurrentBlockIndex(nextConflictIndex);
+      } else {
+        // 全て解決したら Describe へ
+        await handleDescribe(newOrder as FunctionCode[]);
+      }
+    }
+  };
+
   // Step 2: Geminiに分析してもらう (/api/describe)
   const handleDescribe = async (rawOrder: OrderElement[]) => {
+    setLoading(true);
     setLoadingMessage("Geminiがあなたの魂を言語化しています...");
 
-    // 1. データを整形 (MVP用: 葛藤ブロックを強制的に平坦化)
-    // 本当はここでユーザーに順位を決めさせるUIが入る
+    // 1. データを整形
     const finalOrder = rawOrder.flat() as FunctionCode[];
 
     // 2. 健全度と階層を自動生成 (MVP用: 仮データ)
@@ -178,6 +249,105 @@ export default function Home() {
   };
 
   // --- UI Render ---
+
+  // 葛藤解決画面 (Resolve Phase)
+  if (step === "resolve" && calculateResult) {
+    const targetBlock =
+      conflictBlock.length > 0
+        ? conflictBlock
+        : (calculateResult.order.find((el) => Array.isArray(el)) as
+            | FunctionCode[]
+            | undefined);
+
+    // もしブロックが見つからなければ次へ進む
+    if (!targetBlock) {
+      handleDescribe(calculateResult.order as FunctionCode[]);
+      return <div className="p-10 text-white">Loading...</div>;
+    }
+
+    const remainingFuncs = targetBlock.filter(
+      (f) => !resolvedBlock.includes(f)
+    );
+
+    return (
+      <div className="min-h-screen bg-gray-800 text-white flex flex-col items-center justify-center p-6">
+        <div className="max-w-lg w-full bg-gray-700 rounded-2xl p-8 shadow-2xl">
+          <h2 className="text-2xl font-bold mb-2 text-yellow-400">
+            ⚡ 葛藤検出
+          </h2>
+          <p className="text-gray-300 mb-6">
+            論理では順位をつけられませんでした。
+            <br />
+            あなたの感覚で、強いと思う順に選んでください。
+          </p>
+
+          {/* 1. 順位決定エリア */}
+          <div className="space-y-2 mb-8 min-h-[150px]">
+            {targetBlock.map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-4 p-3 bg-gray-800 rounded-lg border border-gray-600"
+              >
+                <span className="text-gray-500 font-mono w-6 text-right">
+                  {i + 1}.
+                </span>
+                {resolvedBlock[i] ? (
+                  <span className="text-xl font-bold text-blue-300 animate-pulse">
+                    {resolvedBlock[i]}
+                  </span>
+                ) : (
+                  <span className="text-gray-600 text-sm">
+                    （下から選んでください）
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* 2. 選択肢ボタンエリア */}
+          <div className="flex flex-wrap gap-3 justify-center mb-8">
+            {remainingFuncs.map((func) => (
+              <button
+                key={func}
+                onClick={() => handleSelectOrder(func)}
+                className="px-6 py-3 bg-white text-gray-900 rounded-full font-bold text-lg shadow-lg hover:bg-yellow-300 hover:scale-105 transition-all"
+              >
+                {func}
+              </button>
+            ))}
+            {remainingFuncs.length === 0 && (
+              <p className="text-green-400 font-bold">
+                全ての順位が決まりました！
+              </p>
+            )}
+          </div>
+
+          {/* 3. アクションボタン */}
+          <div className="flex gap-4">
+            <button
+              onClick={handleResetConflict}
+              className="flex-1 py-3 rounded-xl border border-gray-500 text-gray-400 hover:bg-gray-600"
+            >
+              やり直す
+            </button>
+            <button
+              onClick={handleConfirmConflict}
+              disabled={remainingFuncs.length > 0}
+              className={`flex-1 py-3 rounded-xl font-bold text-lg transition-all
+                ${
+                  remainingFuncs.length > 0
+                    ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-500/30"
+                }
+              `}
+            >
+              決定して次へ
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (step === "result" && describeResult && calculateResult) {
     return (
