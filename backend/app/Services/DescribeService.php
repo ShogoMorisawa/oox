@@ -75,7 +75,16 @@ class DescribeService
 
     private function generateTitle(array $finalOrder): string
     {
-        $sliced = array_pad(array_slice($finalOrder, 0, 3), 3, 'Fi');
+        // 葛藤ブロック（配列）が混ざっていても安全に処理できるよう平坦化してから上位3件を取得
+        $flattened = [];
+        foreach ($finalOrder as $item) {
+            if (is_array($item)) {
+                $flattened = array_merge($flattened, $item);
+            } else {
+                $flattened[] = $item;
+            }
+        }
+        $sliced = array_pad(array_slice($flattened, 0, 3), 3, 'Fi');
         [$first, $second, $third] = $sliced;
 
         $habitatMap = [
