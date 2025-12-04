@@ -3,6 +3,8 @@
 
 import { useState } from "react";
 
+import StartScreen from "@/components/screens/StartScreen";
+
 // --- 型定義 ---
 type FunctionCode = "Ni" | "Ne" | "Ti" | "Te" | "Fi" | "Fe" | "Si" | "Se";
 type OrderElement = FunctionCode | FunctionCode[];
@@ -79,7 +81,9 @@ const BASE_URL = "https://6cs4ipgnf9.execute-api.ap-northeast-1.amazonaws.com"; 
 
 export default function Home() {
   // --- State ---
-  const [step, setStep] = useState<"quiz" | "resolve" | "result">("quiz"); // 画面切り替え用
+  const [step, setStep] = useState<"start" | "quiz" | "resolve" | "result">(
+    "start"
+  ); // 画面切り替え用
 
   const [answers, setAnswers] = useState<Record<string, FunctionCode>>(() => {
     const initial: Record<string, FunctionCode> = {};
@@ -100,6 +104,11 @@ export default function Home() {
   const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
 
   // --- Handlers ---
+
+  // スタートボタンを押した時の処理
+  const handleStart = () => {
+    setStep("quiz");
+  };
 
   const handleChange = (id: string, value: FunctionCode) => {
     setAnswers((prev) => ({ ...prev, [id]: value }));
@@ -249,6 +258,11 @@ export default function Home() {
   };
 
   // --- UI Render ---
+
+  // スタート画面
+  if (step === "start") {
+    return <StartScreen onStart={handleStart} />;
+  }
 
   // 葛藤解決画面 (Resolve Phase)
   if (step === "resolve" && calculateResult) {
