@@ -72,11 +72,7 @@ export default function Home() {
   // --- State ---
   const [step, setStep] = useState<Step>(OOX_STEPS.START); // 画面切り替え用
 
-  const [answers, setAnswers] = useState<Record<string, FunctionCode>>(() => {
-    const initial: Record<string, FunctionCode> = {};
-    for (const q of QUESTIONS) initial[q.id] = q.left;
-    return initial;
-  });
+  const [answers, setAnswers] = useState<Record<string, FunctionCode>>({});
 
   const [calculateResult, setCalculateResult] =
     useState<CalculateResponse | null>(null);

@@ -6,4 +6,3 @@ export const OOX_STEPS = {
 } as const;
 
 export type Step = (typeof OOX_STEPS)[keyof typeof OOX_STEPS];
-

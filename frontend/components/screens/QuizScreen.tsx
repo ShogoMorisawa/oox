@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { FunctionCode, Question } from "@/types/oox";
 
 type Props = {
@@ -19,6 +20,14 @@ export default function QuizScreen({
   onChange,
   onCalculate,
 }: Props) {
+  const [index, setIndex] = useState(0);
+
+  const totalQuestions = questions.length;
+  const currentQuestion = questions[index];
+  const currentAnswer = answers[currentQuestion.id];
+  const isLastQuestion = index === totalQuestions - 1;
+  const progress = (index + 1) / totalQuestions;
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-12 px-4">
       <h1 className="text-3xl font-bold mb-8 text-indigo-700 tracking-tight">
@@ -29,46 +38,46 @@ export default function QuizScreen({
       </h1>
 
       <div className="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-6 space-y-6">
-        {/* 質問リスト */}
-        <div className="space-y-4 max-h-[60vh] overflow-y-auto border border-gray-100 rounded-xl p-4 bg-gray-50/50">
-          {questions.map((q, index) => (
-            <div
-              key={q.id}
-              className="bg-white p-4 rounded-lg shadow-sm border border-gray-100"
-            >
-              <p className="text-xs text-gray-400 mb-2 font-mono">
-                Q{index + 1}
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <p className="text-sm text-gray-600 font-medium flex-1 text-center sm:text-left">
-                  {q.text}
-                </p>
+        {/* 現在の質問 */}
+        <div className="space-y-4 border border-gray-100 rounded-xl p-4 bg-gray-50/50">
+          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+            <p className="text-xs text-gray-400 mb-2 font-mono">
+              Q{index + 1} / {totalQuestions}
+            </p>
 
-                <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
-                  <button
-                    onClick={() => onChange(q.id, q.left)}
-                    className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
-                      answers[q.id] === q.left
-                        ? "bg-indigo-600 text-white shadow-md"
-                        : "text-gray-500 hover:bg-gray-200"
-                    }`}
-                  >
-                    {q.left}
-                  </button>
-                  <button
-                    onClick={() => onChange(q.id, q.right)}
-                    className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
-                      answers[q.id] === q.right
-                        ? "bg-pink-500 text-white shadow-md"
-                        : "text-gray-500 hover:bg-gray-200"
-                    }`}
-                  >
-                    {q.right}
-                  </button>
-                </div>
+            <div className="flex flex-col gap-4">
+              <p className="text-sm text-gray-600 font-medium">
+                {currentQuestion.text}
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button
+                  onClick={() =>
+                    onChange(currentQuestion.id, currentQuestion.left)
+                  }
+                  className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
+                    currentAnswer === currentQuestion.left
+                      ? "bg-indigo-600 text-white shadow-md"
+                      : "text-gray-500 hover:bg-gray-200"
+                  }`}
+                >
+                  {currentQuestion.left}
+                </button>
+                <button
+                  onClick={() =>
+                    onChange(currentQuestion.id, currentQuestion.right)
+                  }
+                  className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
+                    currentAnswer === currentQuestion.right
+                      ? "bg-pink-500 text-white shadow-md"
+                      : "text-gray-500 hover:bg-gray-200"
+                  }`}
+                >
+                  {currentQuestion.right}
+                </button>
               </div>
             </div>
-          ))}
+          </div>
         </div>
 
         {/* アクションボタン */}
