@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import Image from "next/image";
+import { Quicksand } from "next/font/google";
 import { FunctionCode, CalculateResponse } from "@/types/oox";
 
 type Props = {
@@ -12,6 +14,13 @@ type Props = {
   onConfirm: () => void;
   onDescribe: () => void;
 };
+
+const quicksand = Quicksand({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const SLOT_COUNT = 8;
 
 export default function ResolveScreen({
   calculateResult,
