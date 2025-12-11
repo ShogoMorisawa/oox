@@ -24,7 +24,16 @@ export default function StartScreen({ onStart }: Props) {
   if (cells.length === 0) return null;
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-b from-sky-50 via-sky-100/50 to-sky-200/30 relative overflow-hidden">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden">
+      {/* 背景画像 */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url(/images/oox_background.png)" }}
+      />
+
+      {/* 背景オーバーレイ（テキストの可読性を保つため） */}
+      <div className="absolute inset-0 bg-white/20" />
+
       {/* 1. 背景の装飾（CSSで作る薄い光の玉） */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute left-10 top-32 w-32 h-32 rounded-full bg-sky-200 mix-blend-multiply filter blur-3xl opacity-30 animate-blob" />
