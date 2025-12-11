@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
+import { Quicksand } from "next/font/google";
 import { FunctionCode, Question } from "@/types/oox";
 import { CELL_COLORS } from "@/constants/cells";
 
@@ -12,6 +14,11 @@ type Props = {
   onChange: (id: string, value: FunctionCode) => void;
   onCalculate: () => void;
 };
+
+const quicksand = Quicksand({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
 
 export default function QuizScreen({
   questions,
@@ -25,9 +32,9 @@ export default function QuizScreen({
 
   const totalQuestions = questions.length;
   const currentQuestion = questions[index];
-  const currentAnswer = answers[currentQuestion.id];
   const isLastQuestion = index === totalQuestions - 1;
   const progress = (index + 1) / totalQuestions;
+  const currentAnswer = answers[currentQuestion.id];
 
   const handleSelect = (choice: "left" | "right") => {
     if (loading) return;
@@ -35,6 +42,7 @@ export default function QuizScreen({
       choice === "left" ? currentQuestion.left : currentQuestion.right;
     onChange(currentQuestion.id, value);
   };
+
   const handleNext = () => {
     if (loading) return;
     if (!currentAnswer) return;
@@ -45,6 +53,7 @@ export default function QuizScreen({
       onCalculate();
     }
   };
+
   const handlePrev = () => {
     if (loading) return;
     if (index === 0) return;
@@ -53,140 +62,202 @@ export default function QuizScreen({
   };
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/60 to-white flex flex-col items-center py-12 px-4 overflow-hidden">
-      {/* うっすら浮かぶ背景の粒 */}
+    <div className="min-h-screen w-full relative overflow-hidden font-sans">
+      {/* 背景画像 */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url(/images/oox_background.png)" }}
+      />
+
+      {/* 背景オーバーレイ（テキストの可読性を保つため） */}
+      <div className="absolute inset-0 bg-white/20" />
+
+      {/* --- 背景のエフェクト (変更なし) --- */}
       <div className="pointer-events-none absolute inset-0">
-        <span className="absolute left-10 top-32 w-4 h-4 rounded-full bg-sky-100 opacity-60 animate-float-slow" />
-        <span className="absolute right-16 top-52 w-6 h-6 rounded-full bg-sky-100 opacity-50 animate-float-medium" />
-        <span className="absolute left-1/4 bottom-24 w-3 h-3 rounded-full bg-sky-100 opacity-40 animate-float-fast" />
-        <span className="absolute right-1/5 bottom-32 w-8 h-8 rounded-full bg-sky-100 opacity-50 animate-float-slow" />
+        <div className="absolute -top-20 -left-20 w-96 h-96 bg-sky-200/30 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 right-0 w-80 h-80 bg-pink-100/30 rounded-full blur-3xl" />
+        <span className="absolute left-10 top-3/4 w-4 h-4 rounded-full bg-white/40 animate-float-slow" />
+        <span className="absolute right-20 top-2/3 w-6 h-6 rounded-full bg-white/30 animate-float-medium" />
+        <span className="absolute left-1/3 bottom-10 w-3 h-3 rounded-full bg-white/50 animate-float-fast" />
       </div>
 
-      <h1 className="text-3xl font-bold mb-8 text-indigo-700 tracking-tight relative">
-        OoX Mirror{" "}
-        <span className="text-sm font-normal text-gray-500 ml-2">
-          Prototype v0.1
-        </span>
-      </h1>
-
-      <div className="w-full max-w-3xl bg-white/60 backdrop-blur-md rounded-3xl shadow-[0_18px_40px_rgba(148,163,184,0.25)] p-6 space-y-6 border border-white/60">
-        {/* 現在の質問 */}
-        <div className="space-y-4 rounded-2xl p-5 bg-white/60 backdrop-blur-sm border border-white/70 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-gray-400 font-mono mb-3">
-            <span className="uppercase tracking-widest text-gray-500">
-              Question
-            </span>
-            <span>
-              Q{index + 1} / {totalQuestions}
-            </span>
+      {/* --- メインコンテンツ --- */}
+      <div className="relative z-10 flex flex-col items-center pt-8 pb-32 px-6 max-w-md mx-auto h-full min-h-screen justify-between">
+        {/* 1. 質問バブル（上部） -> 画像に変更 */}
+        <div className="w-full animate-float-slow relative min-h-[12rem] flex items-center justify-center">
+          {/* ▼ 背景画像 (oox_quiz_question.png) */}
+          <div className="absolute inset-0 w-full h-full z-0 pointer-events-none drop-shadow-lg">
+            <Image
+              src="/images/oox_quiz_question.png"
+              alt="Question bubble"
+              fill
+              className="object-fill" // テキスト量に合わせて枠を引き伸ばす
+              priority
+            />
           </div>
 
-          <p className="text-base text-gray-700 font-medium leading-relaxed">
-            {currentQuestion.text}
-          </p>
+          {/* ▼ テキストコンテンツ (画像の上に重ねる) */}
+          <div className="relative z-10 p-8 text-center pb-10">
+            <p className="text-gray-500 text-xs font-bold tracking-widest mb-3 uppercase">
+              Question {index + 1}
+            </p>
+            <h2 className="text-slate-800 text-lg md:text-xl font-medium leading-relaxed tracking-wide">
+              {currentQuestion.text}
+            </h2>
+          </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <button
-              onClick={() => handleSelect("left")}
-              className={`w-full text-left p-4 rounded-2xl border transition-all 
-                ${
+        {/* 2. 回答ボタンエリア（中部） -> 画像に変更 */}
+        <div className="w-full grid grid-cols-2 gap-4 mt-8">
+          {/* 左の選択肢 (A) */}
+          <button
+            onClick={() => handleSelect("left")}
+            className={`
+              relative group aspect-square rounded-[2.5rem] flex flex-col items-center justify-center transition-all duration-300
+              ${
+                currentAnswer === currentQuestion.left
+                  ? "scale-105"
+                  : "hover:-translate-y-1"
+              }
+            `}
+          >
+            {/* ▼ 背景画像 (oox_quiz_choice-lightBlue.png) */}
+            <div className="absolute inset-0 w-full h-full z-0 rounded-[2.5rem] overflow-hidden drop-shadow-md">
+              <Image
+                src="/images/oox_quiz_choice-lightBlue.png"
+                alt="Choice A background"
+                fill
+                className="object-cover"
+              />
+              {/* 選択時の色付きオーバーレイ（水色） */}
+              <div
+                className={`absolute inset-0 bg-sky-500/20 mix-blend-overlay transition-opacity duration-300 ${
                   currentAnswer === currentQuestion.left
-                    ? "bg-sky-500 text-white border-sky-400 shadow-lg shadow-sky-200/60"
-                    : "bg-sky-100/60 border-sky-100 text-gray-700 hover:-translate-y-0.5 hover:shadow-md"
+                    ? "opacity-100"
+                    : "opacity-0 group-hover:opacity-50"
                 }`}
-            >
-              <span className="block text-sm font-semibold">
+              />
+            </div>
+
+            {/* ▼ テキストコンテンツ */}
+            <div className="relative z-10 flex flex-col items-center p-4">
+              <span
+                className={`text-xl font-bold mb-2 ${quicksand.className} text-slate-700`}
+              >
+                A
+              </span>
+              <span className="text-sm font-bold text-center leading-tight text-slate-700">
                 {currentQuestion.left}
               </span>
-            </button>
+            </div>
+          </button>
 
-            <button
-              onClick={() => handleSelect("right")}
-              className={`w-full text-left p-4 rounded-2xl border transition-all 
-                ${
+          {/* 右の選択肢 (B) */}
+          <button
+            onClick={() => handleSelect("right")}
+            className={`
+              relative group aspect-square rounded-[2.5rem] flex flex-col items-center justify-center transition-all duration-300
+              ${
+                currentAnswer === currentQuestion.right
+                  ? "scale-105"
+                  : "hover:-translate-y-1"
+              }
+            `}
+          >
+            {/* ▼ 背景画像 (oox_quiz_choice-lightBlue.png) */}
+            <div className="absolute inset-0 w-full h-full z-0 rounded-[2.5rem] overflow-hidden drop-shadow-md">
+              <Image
+                src="/images/oox_quiz_choice-lightBlue.png" // とりあえず両方同じ水色の画像
+                alt="Choice B background"
+                fill
+                className="object-cover"
+              />
+              {/* 選択時の色付きオーバーレイ（ピンク） */}
+              <div
+                className={`absolute inset-0 bg-pink-500/20 mix-blend-overlay transition-opacity duration-300 ${
                   currentAnswer === currentQuestion.right
-                    ? "bg-pink-500 text-white border-pink-400 shadow-lg shadow-pink-200/60"
-                    : "bg-sky-100/60 border-sky-100 text-gray-700 hover:-translate-y-0.5 hover:shadow-md"
+                    ? "opacity-100"
+                    : "opacity-0 group-hover:opacity-50"
                 }`}
-            >
-              <span className="block text-sm font-semibold">
+              />
+            </div>
+
+            {/* ▼ テキストコンテンツ */}
+            <div className="relative z-10 flex flex-col items-center p-4">
+              <span
+                className={`text-xl font-bold mb-2 ${quicksand.className} text-slate-700`}
+              >
+                B
+              </span>
+              <span className="text-sm font-bold text-center leading-tight text-slate-700">
                 {currentQuestion.right}
               </span>
-            </button>
-          </div>
+            </div>
+          </button>
         </div>
 
-        {/* アクションボタン */}
-        <div className="flex items-center justify-between mt-6">
+        {/* ナビゲーションボタン (変更なし) */}
+        <div className="flex w-full justify-between items-center mt-6 px-2 relative z-20">
           <button
             onClick={handlePrev}
-            disabled={loading}
-            className="px-4 py-2 rounded-md text-sm font-bold text-gray-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:text-indigo-600"
+            disabled={index === 0 || loading}
+            className="text-sm text-slate-500 hover:text-slate-700 disabled:opacity-0 transition-colors font-medium"
           >
-            {index > 0 ? "〈 戻る" : ""}
+            ← Back
           </button>
-          <button
-            onClick={handleNext}
-            disabled={loading || !currentAnswer}
-            className="px-8 py-3 rounded-full text-white font-bold bg-gradient-to-r from-indigo-600 to-purple-600 disabled:opacity-60 shadow-md hover:shadow-lg transition-all"
-          >
-            {loading
-              ? loadingMessage || "分析中..."
-              : isLastQuestion
-              ? "結果を見る"
-              : "次の質問へ"}
-          </button>
+
+          {currentAnswer && (
+            <button
+              onClick={handleNext}
+              disabled={loading}
+              className="px-6 py-2 rounded-full bg-white text-sky-600 font-bold text-sm shadow-md hover:shadow-lg transition-all animate-bounce-slow"
+            >
+              {isLastQuestion ? "結果を見る" : "Next →"}
+            </button>
+          )}
         </div>
       </div>
 
-      {/* 下部ビジュアル：左右の細胞 + 水位付きポッド */}
-      <div className="w-full max-w-3xl flex items-end justify-center gap-10 mt-10">
-        {/* 左の細胞 */}
-        <div
-          className={`w-16 h-16 rounded-full ${
-            CELL_COLORS[currentQuestion.left]
-          } shadow-lg shadow-sky-200/60 flex items-center justify-center relative`}
-        >
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-white shadow-sm">
-              <span className="block w-2 h-2 mt-[1px] ml-[1px] rounded-full bg-slate-800" />
-            </span>
-            <span className="w-3 h-3 rounded-full bg-white shadow-sm">
-              <span className="block w-2 h-2 mt-[1px] ml-[1px] rounded-full bg-slate-800" />
-            </span>
-          </div>
-          <span className="absolute bottom-1 w-6 h-1 rounded-full bg-white/70 opacity-80"></span>
+      {/* --- 3. 下部のシーン（ポッドと細胞） (変更なし) --- */}
+      <div className="absolute bottom-0 left-0 w-full h-48 flex justify-center items-end pb-4 pointer-events-none z-0">
+        {/* ... (細胞とポッドのコードは以前と同じ) ... */}
+        {/* 左の細胞（赤） */}
+        <div className="absolute left-[10%] bottom-16 w-20 h-20 animate-float-medium z-20">
+          <Image
+            src="/images/oox_start_cell-red.png"
+            alt="Red Cell"
+            width={100}
+            height={100}
+            className="object-contain drop-shadow-xl"
+          />
         </div>
-
-        {/* ポッド */}
-        <div className="relative w-40 h-52 rounded-[3rem] bg-white/40 backdrop-blur-md border border-white/70 shadow-lg overflow-hidden">
-          {/* 水位（progressを高さに反映） */}
+        {/* 右の細胞（青） */}
+        <div className="absolute right-[10%] bottom-24 w-20 h-20 animate-float-fast z-20">
+          <Image
+            src="/images/oox_start_cell-lightBlue.png"
+            alt="Blue Cell"
+            width={80}
+            height={80}
+            className="object-contain drop-shadow-xl"
+          />
+        </div>
+        {/* 中央のポッド（水位計） */}
+        <div className="relative z-10 w-32 h-40 flex items-end justify-center">
           <div
-            className="absolute inset-x-0 bottom-0 transition-all duration-700"
-            style={{ height: `${20 + progress * 60}%` }}
+            className="absolute bottom-2 w-[80%] bg-sky-300/40 rounded-b-[2rem] overflow-hidden transition-all duration-1000 ease-in-out"
+            style={{ height: `${20 + progress * 70}%` }}
           >
-            <div className="w-full h-full bg-gradient-to-t from-sky-300/80 via-sky-200/60 to-sky-100/20" />
+            <div className="absolute top-0 left-0 w-[200%] h-4 bg-sky-200/50 animate-wave opacity-70" />
+            <div className="w-full h-full bg-gradient-to-t from-sky-400/30 to-sky-100/10" />
           </div>
-          {/* ハイライト線 */}
-          <div className="absolute top-3 left-3 w-28 h-40 rounded-[2rem] border-t border-l border-white/60 opacity-70 pointer-events-none" />
-          <div className="absolute bottom-4 right-6 w-8 h-8 rounded-full bg-white/30 blur-lg opacity-70 pointer-events-none" />
-        </div>
-
-        {/* 右の細胞 */}
-        <div
-          className={`w-16 h-16 rounded-full ${
-            CELL_COLORS[currentQuestion.right]
-          } shadow-lg shadow-sky-200/60 flex items-center justify-center relative`}
-        >
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-white shadow-sm">
-              <span className="block w-2 h-2 mt-[1px] ml-[1px] rounded-full bg-slate-800" />
-            </span>
-            <span className="w-3 h-3 rounded-full bg-white shadow-sm">
-              <span className="block w-2 h-2 mt-[1px] ml-[1px] rounded-full bg-slate-800" />
-            </span>
+          <div className="absolute inset-0 w-full h-full">
+            <Image
+              src="/images/oox_start_pod.png"
+              alt="Pod"
+              fill
+              className="object-contain opacity-90"
+            />
           </div>
-          <span className="absolute bottom-1 w-6 h-1 rounded-full bg-white/70 opacity-80"></span>
         </div>
       </div>
     </div>
