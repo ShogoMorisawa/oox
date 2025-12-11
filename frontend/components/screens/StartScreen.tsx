@@ -1,12 +1,18 @@
 "use client";
 
 import Image from "next/image";
+import { Quicksand } from "next/font/google";
 import { useState } from "react";
 import { CELL_COLORS } from "@/constants/cells";
 
 type Props = {
   onStart: () => void;
 };
+
+const quicksand = Quicksand({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
 
 export default function StartScreen({ onStart }: Props) {
   const [cells] = useState<string[]>(() => {
@@ -41,10 +47,30 @@ export default function StartScreen({ onStart }: Props) {
       </div>
 
       {/* 2. タイトル */}
-      <h1 className="relative z-10 text-6xl md:text-7xl font-light tracking-[0.2em] text-slate-700 mb-6 drop-shadow-sm">
-        OoX
-      </h1>
+      <div className="relative z-10 mb-6 flex flex-col items-center">
+        <h1
+          className={`
+            ${quicksand.className} 
+            text-7xl md:text-8xl 
+            font-light 
+            tracking-[0.2em] 
+            
+            /* 文字色をグラデーションにする魔法 */
+            text-transparent bg-clip-text bg-gradient-to-br from-slate-600 via-slate-500 to-sky-400
+            
+            /* ぼんやりとした影で浮遊感を出す */
+            drop-shadow-lg
+            
+            /* ゆっくり動かす */
+            animate-float-slow
+          `}
+        >
+          OoX
+        </h1>
 
+        {/* おまけ：タイトルの下に小さな光の反射を入れるとガラスっぽくなります */}
+        <div className="w-16 h-1 bg-gradient-to-r from-transparent via-sky-300 to-transparent opacity-50 blur-[1px] rounded-full mt-2 animate-pulse" />
+      </div>
       {/* 3. メインビジュアル（カプセルと細胞） */}
       <div className="relative z-10 mb-10 w-[300px] h-[380px] flex items-center justify-center">
         {/* レイヤーA: カプセルの背後の光（ぼんやり光らせる） */}
