@@ -100,7 +100,7 @@ export const useOoX = () => {
       { id: "dev6", winner: "Ne" as FunctionCode, loser: "Si" as FunctionCode },
       { id: "dev7", winner: "Si" as FunctionCode, loser: "Ti" as FunctionCode },
       // ブロックからの支配
-      { id: "dev8", winner: "Si" as FunctionCode, loser: "Se" as FunctionCode },
+      { id: "dev8", winner: "Ni" as FunctionCode, loser: "Se" as FunctionCode },
     ];
 
     // 元の実装（コメントアウト）
