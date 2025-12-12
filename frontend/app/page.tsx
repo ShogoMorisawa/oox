@@ -36,6 +36,20 @@ export default function Home() {
     return <StartScreen onStart={handleStart} />;
   }
 
+  // Quiz画面
+  if (step === OOX_STEPS.QUIZ) {
+    return (
+      <QuizScreen
+        questions={QUESTIONS}
+        answers={answers}
+        loading={loading}
+        loadingMessage={loadingMessage}
+        onChange={handleChange}
+        onCalculate={handleCalculate}
+      />
+    );
+  }
+
   // 葛藤解決画面 (Resolve Phase)
   if (step === OOX_STEPS.RESOLVE && calculateResult) {
     return (
@@ -63,16 +77,4 @@ export default function Home() {
       />
     );
   }
-
-  // Quiz画面
-  return (
-    <QuizScreen
-      questions={QUESTIONS}
-      answers={answers}
-      loading={loading}
-      loadingMessage={loadingMessage}
-      onChange={handleChange}
-      onCalculate={handleCalculate}
-    />
-  );
 }
