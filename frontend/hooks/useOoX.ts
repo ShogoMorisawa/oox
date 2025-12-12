@@ -197,6 +197,16 @@ export const useOoX = () => {
     setCalculateResult(null);
     setResolvedBlock([]);
 
+    // 未回答のorder質問をチェック
+    const orderQuestions = QUESTIONS.filter(isOrderQuestion);
+    const unanswered = orderQuestions.filter((q) => !answers[q.id]);
+
+    if (unanswered.length > 0) {
+      alert(`未回答の質問があります（${unanswered.length}問）`);
+      setLoading(false);
+      return;
+    }
+
     const matches = buildMatchesFromAnswers();
     const url = `${API_BASE_URL}/api/calculate`;
     const requestBody = { matches };
