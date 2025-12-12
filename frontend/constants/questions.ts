@@ -2,14 +2,17 @@ import { Question, isOrderQuestion, isHealthQuestion } from "@/types/oox";
 
 /**
  * QUESTIONS のデータ不整合をチェック（開発時のみ）
- * - order質問: 各choiceに winner/loser が必須
- * - health質問: 各choiceに effect.health が必須
+ * - order質問: 2択固定、各choiceに winner/loser が必須
+ * - health質問: 2択固定、各choiceに effect.health が必須
  */
 function validateQuestions(questions: Question[]): void {
   const errors: string[] = [];
 
   for (const q of questions) {
     if (isOrderQuestion(q)) {
+      if (q.choices.length !== 2) {
+        errors.push(`[${q.id}] order質問は2択である必要があります`);
+      }
       for (const choice of q.choices) {
         if (!choice.winner || !choice.loser) {
           errors.push(
@@ -23,6 +26,9 @@ function validateQuestions(questions: Question[]): void {
         }
       }
     } else if (isHealthQuestion(q)) {
+      if (q.choices.length !== 2) {
+        errors.push(`[${q.id}] health質問は2択である必要があります`);
+      }
       for (const choice of q.choices) {
         if (choice.effect?.health === undefined) {
           errors.push(
