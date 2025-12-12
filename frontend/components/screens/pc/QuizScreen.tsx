@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import { Quicksand } from "next/font/google";
-import { FunctionCode, Question } from "@/types/oox";
+import type { Choice, Question } from "@/types/oox";
+
+type AnswerValue = Choice["id"];
 
 type Props = {
   questions: Question[];
-  answers: Record<string, FunctionCode>;
+  answers: Record<string, AnswerValue>;
   loading: boolean;
   loadingMessage: string;
-  onChange: (id: string, value: FunctionCode) => void;
+  onChange: (questionId: string, choiceId: AnswerValue) => void;
   onCalculate: () => void;
 };
 
@@ -33,20 +35,24 @@ export default function QuizScreen({
   const currentQuestion = questions[index];
   const isLastQuestion = index === totalQuestions - 1;
   const progress = (index + 1) / totalQuestions;
+
   const currentAnswer = answers[currentQuestion.id];
 
-  const handleSelect = (choice: "left" | "right") => {
+  const choices = useMemo(() => currentQuestion.choices, [currentQuestion]);
+
+  const gridColsClass = choices.length === 3 ? "grid-cols-3" : "grid-cols-2";
+
+  const handleSelect = (choiceId: AnswerValue) => {
     if (loading) return;
-    const value =
-      choice === "left" ? currentQuestion.left : currentQuestion.right;
-    onChange(currentQuestion.id, value);
+    onChange(currentQuestion.id, choiceId);
   };
 
   const handleNext = () => {
     if (loading) return;
     if (!currentAnswer) return;
+
     if (!isLastQuestion) {
-      setIndex(index + 1);
+      setIndex((prev) => prev + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       onCalculate();
@@ -56,7 +62,8 @@ export default function QuizScreen({
   const handlePrev = () => {
     if (loading) return;
     if (index === 0) return;
-    setIndex(index - 1);
+
+    setIndex((prev) => prev - 1);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -83,100 +90,86 @@ export default function QuizScreen({
               priority
             />
           </div>
+
           <div className="relative z-10 p-8 text-center pb-10">
             <p className="text-gray-500 text-xs font-bold tracking-widest mb-3 uppercase">
-              Question {index + 1}
+              Question {index + 1} / {totalQuestions}
             </p>
+
+            {/* kind をさりげなく表示（任意） */}
+            <p className="text-[10px] text-gray-400 mb-2 uppercase tracking-widest">
+              {currentQuestion.kind}
+            </p>
+
             <h2 className="text-slate-800 text-lg md:text-xl font-medium leading-relaxed tracking-wide">
               {currentQuestion.text}
             </h2>
           </div>
         </div>
 
-        {/* 2. 回答ボタンエリア */}
-        <div className="w-full grid grid-cols-2 gap-4 shrink-0">
-          {/* 左 (A) */}
-          <button
-            onClick={() => handleSelect("left")}
-            className={`
-              relative group aspect-square rounded-[2.5rem] flex flex-col items-center justify-center transition-all duration-300
-              ${
-                currentAnswer === currentQuestion.left
-                  ? "scale-105"
-                  : "hover:-translate-y-1"
-              }
-            `}
-          >
-            <div className="absolute inset-0 w-full h-full z-0 rounded-[2.5rem] overflow-hidden drop-shadow-md">
-              <Image
-                src="/images/oox_quiz_choice-lightBlue.png"
-                alt="Choice A background"
-                fill
-                className="object-cover"
-              />
-              <div
-                className={`absolute inset-0 bg-sky-500/20 mix-blend-overlay transition-opacity duration-300 ${
-                  currentAnswer === currentQuestion.left
-                    ? "opacity-100"
-                    : "opacity-0 group-hover:opacity-50"
-                }`}
-              />
-            </div>
-            <div className="relative z-10 flex flex-col items-center p-4">
-              <span
-                className={`text-xl font-bold mb-2 ${quicksand.className} text-slate-700`}
-              >
-                A
-              </span>
-              <span className="text-sm font-bold text-center leading-tight text-slate-700">
-                {currentQuestion.left}
-              </span>
-            </div>
-          </button>
+        {/* ローディング表示（任意） */}
+        {loading && (
+          <div className="text-xs text-slate-600 font-medium">
+            {loadingMessage}
+          </div>
+        )}
 
-          {/* 右 (B) */}
-          <button
-            onClick={() => handleSelect("right")}
-            className={`
-              relative group aspect-square rounded-[2.5rem] flex flex-col items-center justify-center transition-all duration-300
-              ${
-                currentAnswer === currentQuestion.right
-                  ? "scale-105"
-                  : "hover:-translate-y-1"
-              }
-            `}
-          >
-            <div className="absolute inset-0 w-full h-full z-0 rounded-[2.5rem] overflow-hidden drop-shadow-md">
-              <Image
-                src="/images/oox_quiz_choice-lightBlue.png"
-                alt="Choice B background"
-                fill
-                className="object-cover"
-              />
-              <div
-                className={`absolute inset-0 bg-pink-500/20 mix-blend-overlay transition-opacity duration-300 ${
-                  currentAnswer === currentQuestion.right
-                    ? "opacity-100"
-                    : "opacity-0 group-hover:opacity-50"
-                }`}
-              />
-            </div>
-            <div className="relative z-10 flex flex-col items-center p-4">
-              <span
-                className={`text-xl font-bold mb-2 ${quicksand.className} text-slate-700`}
+        {/* 2. 回答ボタンエリア */}
+        <div className={`w-full grid ${gridColsClass} gap-4 shrink-0`}>
+          {choices.map((c) => {
+            const isSelected = currentAnswer === c.id;
+
+            return (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => handleSelect(c.id)}
+                disabled={loading}
+                className={[
+                  "relative group aspect-square rounded-[2.5rem] flex flex-col items-center justify-center transition-all duration-300",
+                  isSelected ? "scale-105" : "hover:-translate-y-1",
+                  loading ? "opacity-60" : "",
+                ].join(" ")}
               >
-                B
-              </span>
-              <span className="text-sm font-bold text-center leading-tight text-slate-700">
-                {currentQuestion.right}
-              </span>
-            </div>
-          </button>
+                <div className="absolute inset-0 w-full h-full z-0 rounded-[2.5rem] overflow-hidden drop-shadow-md">
+                  <Image
+                    src="/images/oox_quiz_choice-lightBlue.png"
+                    alt={`Choice ${c.id} background`}
+                    fill
+                    className="object-cover"
+                  />
+                  <div
+                    className={[
+                      "absolute inset-0 mix-blend-overlay transition-opacity duration-300",
+                      isSelected
+                        ? "opacity-100"
+                        : "opacity-0 group-hover:opacity-50",
+                      // ここは好み：選択肢ごとに雰囲気変えるなら条件分岐してもOK
+                      "bg-sky-500/20",
+                    ].join(" ")}
+                  />
+                </div>
+
+                <div className="relative z-10 flex flex-col items-center p-4">
+                  <span
+                    className={`text-xl font-bold mb-2 ${quicksand.className} text-slate-700`}
+                  >
+                    {c.id}
+                  </span>
+
+                  <span className="text-xs md:text-sm font-bold text-center leading-tight text-slate-700 whitespace-pre-line">
+                    {c.text}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
         </div>
 
         {/* ナビゲーションボタン */}
         <div className="flex w-full justify-between items-center px-2 relative z-20 h-10 shrink-0">
           <button
+            type="button"
             onClick={handlePrev}
             disabled={index === 0 || loading}
             className="text-sm text-slate-500 hover:text-slate-700 disabled:opacity-0 transition-colors font-medium"
@@ -186,9 +179,10 @@ export default function QuizScreen({
 
           {currentAnswer && (
             <button
+              type="button"
               onClick={handleNext}
               disabled={loading}
-              className="px-6 py-2 rounded-full bg-white text-sky-600 font-bold text-sm shadow-md hover:shadow-lg transition-all animate-bounce-slow"
+              className="px-6 py-2 rounded-full bg-white text-sky-600 font-bold text-sm shadow-md hover:shadow-lg transition-all animate-bounce-slow disabled:opacity-60"
             >
               {isLastQuestion ? "結果を見る" : "Next →"}
             </button>
