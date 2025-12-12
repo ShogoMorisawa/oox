@@ -22,7 +22,6 @@ const indexToTier = (index: number): Tier => {
   return OOX_TIER.LOW; // 7〜8位
 };
 
-// 心理機能ごとの “ざっくり説明”（文言はあとで好きに変えてOK）
 const FUNCTION_TEXT: Record<FunctionCode, string> = {
   Ni: "未来の意味や物語を考えるのが得意",
   Ne: "アイデアをどんどん思いつく",
@@ -34,7 +33,6 @@ const FUNCTION_TEXT: Record<FunctionCode, string> = {
   Se: "五感で今この瞬間を楽しみたい",
 };
 
-// 真ん中列の着せ替え細胞の画像（上から順）
 const CELL_IMAGES = [
   "/images/oox_hie_cell-night-red-left.png",
   "/images/oox_hie_cell-night-lightBlue-right.png",
@@ -91,11 +89,12 @@ export default function HierarchyScreen({
   });
 
   return (
-    <div className="h-screen flex flex-col justify-between px-6 py-6 md:py-8 bg-[url('/images/oox_background.png')] bg-cover bg-center">
+    // 【修正】h-screen -> min-h-screen (スマホはスクロール許可), md:h-screen (PCは固定)
+    <div className="min-h-screen md:h-screen flex flex-col justify-between px-4 py-6 md:px-6 md:py-8 bg-[url('/images/oox_background.png')] bg-cover bg-center overflow-y-auto md:overflow-hidden">
       <div className="max-w-5xl w-full mx-auto flex flex-col h-full">
         {/* タイトル */}
         <div className="text-center space-y-2 mb-4 shrink-0">
-          <p className="text-xs md:text-sm text-sky-900/60">
+          <p className="text-xs md:text-sm text-sky-900/60 leading-relaxed">
             上から 1〜8 位の順番は、さっきの質問で決まった「よく使う順」。
             <br className="hidden md:block" />
             線で区切られた 4 つのゾーンが、それぞれ 王様 / 騎士 / 市民 / 迷子
@@ -103,10 +102,13 @@ export default function HierarchyScreen({
           </p>
         </div>
 
-        <div className="grid grid-cols-12 gap-4 md:gap-6 items-stretch flex-1 min-h-0 overflow-hidden">
+        {/* メイングリッドエリア */}
+        <div className="grid grid-cols-12 gap-4 md:gap-6 items-stretch flex-1 min-h-0">
           {/* 中央：境界線 + 着せ替え細胞 + 吹き出し */}
-          <div className="col-span-8 flex justify-center">
-            <div className="relative w-[280px] md:w-[340px] h-full">
+          {/* 【修正】スマホでは全幅(col-span-12), PCでは中央(col-span-8) */}
+          <div className="col-span-12 md:col-span-8 flex justify-center">
+            {/* 【修正】スマホ時は高さを固定値(h-[850px])で確保してスクロールさせる */}
+            <div className="relative w-full max-w-[340px] h-[850px] md:h-full">
               {/* 上から8つの細胞をジグザグに配置 + 吹き出し */}
               <div className="absolute inset-0">
                 {finalOrder.map((func, index) => {
@@ -114,32 +116,33 @@ export default function HierarchyScreen({
                   const tier = tierMap[func] ?? indexToTier(index);
                   const tierLabel =
                     TIER_INFO.find((t) => t.tier === tier)?.title ?? "";
-                  // ジグザグ配置：偶数番目は左寄り、奇数番目は右寄り
                   const isEven = index % 2 === 0;
-                  // 各要素の縦位置を計算（親要素の高さを8等分）
-                  const topPercent = (index * 100) / 8 + 2; // 2%は上端の余白
+                  const topPercent = (index * 100) / 8 + 2;
+
+                  // 【修正】スマホ用のオフセットを小さく(60px)、PCは広く(120px~)
                   const translateX = isEven
-                    ? "-translate-x-6 md:-translate-x-7"
-                    : "translate-x-6 md:translate-x-7";
+                    ? "-translate-x-[60px] md:-translate-x-[120px] lg:-translate-x-[140px]"
+                    : "translate-x-[60px] md:translate-x-[120px] lg:translate-x-[140px]";
 
                   return (
                     <div
                       key={func}
-                      className={`absolute left-1/2 -translate-x-1/2 flex items-center gap-2 ${translateX}`}
+                      className={`absolute left-1/2 -translate-x-1/2 flex items-center gap-1 md:gap-2 ${translateX}`}
                       style={{ top: `${topPercent}%` }}
                     >
                       {/* 左側に寄っている細胞（偶数番目）の場合、吹き出しを右側に */}
                       {isEven && (
-                        <div className="relative w-[130px] md:w-[160px] aspect-[3/2] -order-1 shrink-0">
+                        // 【修正】スマホ用にサイズを一回り小さく調整
+                        <div className="relative w-[110px] md:w-[130px] lg:w-[160px] aspect-[3/2] -order-1 shrink-0">
                           <Image
                             src="/images/oox_quiz_question.png"
                             alt="説明吹き出し"
                             fill
                             className="object-contain"
                           />
-                          <div className="absolute inset-0 flex flex-col items-center justify-center px-3 text-[9px] md:text-[10px] text-sky-900 text-center leading-tight">
+                          <div className="absolute inset-0 flex flex-col items-center justify-center px-3 text-[8px] md:text-[10px] text-sky-900 text-center leading-tight">
                             <p className="font-bold mb-0.5">{func}</p>
-                            <p className="whitespace-pre-line">
+                            <p className="whitespace-pre-line scale-90 md:scale-100 origin-center">
                               {FUNCTION_TEXT[func]}
                             </p>
                           </div>
@@ -148,7 +151,8 @@ export default function HierarchyScreen({
 
                       {/* 細胞 */}
                       <div className="flex flex-col items-center gap-0.5 shrink-0">
-                        <div className="relative w-[75px] md:w-[90px] aspect-square">
+                        {/* 【修正】細胞サイズ調整 */}
+                        <div className="relative w-[60px] md:w-[75px] lg:w-[90px] aspect-square">
                           <Image
                             src={imgSrc}
                             alt={`${func} cell`}
@@ -156,23 +160,23 @@ export default function HierarchyScreen({
                             className="object-contain drop-shadow-md"
                           />
                         </div>
-                        <p className="text-[10px] md:text-[11px] text-sky-900/80 font-semibold">
+                        <p className="text-[10px] md:text-[11px] text-sky-900/80 font-semibold whitespace-nowrap">
                           {index + 1} 位・{tierLabel}
                         </p>
                       </div>
 
                       {/* 右側に寄っている細胞（奇数番目）の場合、吹き出しを左側に */}
                       {!isEven && (
-                        <div className="relative w-[130px] md:w-[160px] aspect-[3/2] shrink-0">
+                        <div className="relative w-[110px] md:w-[130px] lg:w-[160px] aspect-[3/2] shrink-0">
                           <Image
                             src="/images/oox_quiz_question.png"
                             alt="説明吹き出し"
                             fill
                             className="object-contain"
                           />
-                          <div className="absolute inset-0 flex flex-col items-center justify-center px-3 text-[9px] md:text-[10px] text-sky-900 text-center leading-tight">
+                          <div className="absolute inset-0 flex flex-col items-center justify-center px-3 text-[8px] md:text-[10px] text-sky-900 text-center leading-tight">
                             <p className="font-bold mb-0.5">{func}</p>
-                            <p className="whitespace-pre-line">
+                            <p className="whitespace-pre-line scale-90 md:scale-100 origin-center">
                               {FUNCTION_TEXT[func]}
                             </p>
                           </div>
@@ -186,7 +190,8 @@ export default function HierarchyScreen({
           </div>
 
           {/* 右：階層ラベル（王様 / 騎士 / 市民 / 迷子） */}
-          <div className="col-span-4 flex flex-col justify-between items-center h-full">
+          {/* 【修正】スマホでは非表示 (hidden)、PC以上で表示 (md:flex) */}
+          <div className="hidden md:flex col-span-4 flex-col justify-between items-center h-full">
             {TIER_INFO.map((info) => (
               <div
                 key={info.tier}
@@ -214,7 +219,7 @@ export default function HierarchyScreen({
         </div>
 
         {/* 下部ボタン */}
-        <div className="mt-6 md:mt-8 flex flex-col items-center gap-3 shrink-0">
+        <div className="mt-8 mb-4 md:mb-0 md:mt-8 flex flex-col items-center gap-3 shrink-0 relative z-10">
           <button
             onClick={onConfirmHierarchy}
             disabled={loading}
