@@ -8,6 +8,7 @@ import {
   // Question, // 開発用でコメントアウト中
 } from "@/types/oox";
 import { OOX_STEPS, Step } from "@/constants/steps";
+import { OOX_TIER, Tier } from "@/constants/tier";
 // import { QUESTIONS } from "@/constants/questions"; // 開発用でコメントアウト中
 import { API_BASE_URL } from "@/constants/api";
 
@@ -19,6 +20,9 @@ export const useOoX = () => {
 
   const [calculateResult, setCalculateResult] =
     useState<CalculateResponse | null>(null);
+  const [tierMap, setTierMap] = useState<Partial<Record<FunctionCode, Tier>>>(
+    {}
+  );
   const [describeResult, setDescribeResult] = useState<DescribeResponse | null>(
     null
   );

@@ -4,6 +4,7 @@
 import StartScreen from "@/components/screens/StartScreen";
 import QuizScreen from "@/components/screens/QuizScreen";
 import ResolveScreen from "@/components/screens/ResolveScreen";
+import HierarchyScreen from "@/components/screens/HierarchyScreen";
 import ResultScreen from "@/components/screens/ResultScreen";
 import { useOoX } from "@/hooks/useOoX";
 import { FunctionCode } from "@/types/oox";
@@ -65,6 +66,11 @@ export default function Home() {
         }
       />
     );
+  }
+
+  // 階層決定画面
+  if (step === OOX_STEPS.HIERARCHY) {
+    return <HierarchyScreen />;
   }
 
   // 結果画面
