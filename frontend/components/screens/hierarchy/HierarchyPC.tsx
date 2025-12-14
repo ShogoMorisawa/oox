@@ -1,26 +1,10 @@
-// frontend/components/screens/HierarchyScreen.tsx
 "use client";
 
 import Image from "next/image";
-import { FunctionCode, CalculateResponse, Tier } from "@/types/oox";
+
+import { HierarchyViewProps } from "./index";
 import { OOX_TIER } from "@/constants/tier";
-
-type Props = {
-  calculateResult: CalculateResponse;
-  tierMap: Partial<Record<FunctionCode, Tier>>;
-  loading: boolean;
-  loadingMessage: string;
-  onUpdateTier: (func: FunctionCode, tier: Tier) => void;
-  onConfirmHierarchy: () => void;
-};
-
-// 各インデックスをどの階層として扱うか（現状は順位ベース）
-const indexToTier = (index: number): Tier => {
-  if (index < 2) return OOX_TIER.DOMINANT; // 1〜2位
-  if (index < 4) return OOX_TIER.HIGH; // 3〜4位
-  if (index < 6) return OOX_TIER.MIDDLE; // 5〜6位
-  return OOX_TIER.LOW; // 7〜8位
-};
+import { FunctionCode, Tier } from "@/types/oox";
 
 const FUNCTION_TEXT: Record<FunctionCode, string> = {
   Ni: "未来の意味や物語を考えるのが得意",
@@ -67,29 +51,10 @@ const TIER_INFO: { tier: Tier; title: string; subtitle: string }[] = [
   },
 ];
 
-export default function HierarchyScreen({
-  calculateResult,
-  tierMap,
-  loading,
-  loadingMessage,
-  onUpdateTier,
-  onConfirmHierarchy,
-}: Props) {
-  // order をフラットにして 8 つの心理機能を取得
-  const finalOrder = (calculateResult.order.flat() as FunctionCode[]).slice(
-    0,
-    8
-  );
-
-  // 初期表示用に、tierMap にまだ値がないところは index ベースで自動設定
-  finalOrder.forEach((func, index) => {
-    if (!tierMap[func]) {
-      onUpdateTier(func, indexToTier(index));
-    }
-  });
+export default function HierarchyPC(props: HierarchyViewProps) {
+  const { finalOrder, tierMap, loading, loadingMessage, onConfirm } = props;
 
   return (
-    // 【修正】h-screen -> min-h-screen (スマホはスクロール許可), md:h-screen (PCは固定)
     <div className="min-h-screen md:h-screen flex flex-col justify-between px-4 py-6 md:px-6 md:py-8 bg-[url('/images/oox_background.png')] bg-cover bg-center overflow-y-auto md:overflow-hidden">
       <div className="max-w-5xl w-full mx-auto flex flex-col h-full">
         {/* タイトル */}
@@ -105,21 +70,17 @@ export default function HierarchyScreen({
         {/* メイングリッドエリア */}
         <div className="grid grid-cols-12 gap-4 md:gap-6 items-stretch flex-1 min-h-0">
           {/* 中央：境界線 + 着せ替え細胞 + 吹き出し */}
-          {/* 【修正】スマホでは全幅(col-span-12), PCでは中央(col-span-8) */}
           <div className="col-span-12 md:col-span-8 flex justify-center">
-            {/* 【修正】スマホ時は高さを固定値(h-[850px])で確保してスクロールさせる */}
             <div className="relative w-full max-w-[340px] h-[850px] md:h-full">
-              {/* 上から8つの細胞をジグザグに配置 + 吹き出し */}
               <div className="absolute inset-0">
                 {finalOrder.map((func, index) => {
                   const imgSrc = CELL_IMAGES[index] ?? CELL_IMAGES[0];
-                  const tier = tierMap[func] ?? indexToTier(index);
+                  const tier = tierMap[func] ?? OOX_TIER.LOW;
                   const tierLabel =
                     TIER_INFO.find((t) => t.tier === tier)?.title ?? "";
                   const isEven = index % 2 === 0;
                   const topPercent = (index * 100) / 8 + 2;
 
-                  // 【修正】スマホ用のオフセットを小さく(60px)、PCは広く(120px~)
                   const translateX = isEven
                     ? "-translate-x-[60px] md:-translate-x-[120px] lg:-translate-x-[140px]"
                     : "translate-x-[60px] md:translate-x-[120px] lg:translate-x-[140px]";
@@ -132,7 +93,6 @@ export default function HierarchyScreen({
                     >
                       {/* 左側に寄っている細胞（偶数番目）の場合、吹き出しを右側に */}
                       {isEven && (
-                        // 【修正】スマホ用にサイズを一回り小さく調整
                         <div className="relative w-[110px] md:w-[130px] lg:w-[160px] aspect-[3/2] -order-1 shrink-0">
                           <Image
                             src="/images/oox_quiz_question.png"
@@ -151,7 +111,6 @@ export default function HierarchyScreen({
 
                       {/* 細胞 */}
                       <div className="flex flex-col items-center gap-0.5 shrink-0">
-                        {/* 【修正】細胞サイズ調整 */}
                         <div className="relative w-[60px] md:w-[75px] lg:w-[90px] aspect-square">
                           <Image
                             src={imgSrc}
@@ -190,7 +149,6 @@ export default function HierarchyScreen({
           </div>
 
           {/* 右：階層ラベル（王様 / 騎士 / 市民 / 迷子） */}
-          {/* 【修正】スマホでは非表示 (hidden)、PC以上で表示 (md:flex) */}
           <div className="hidden md:flex col-span-4 flex-col justify-between items-center h-full">
             {TIER_INFO.map((info) => (
               <div
@@ -221,7 +179,7 @@ export default function HierarchyScreen({
         {/* 下部ボタン */}
         <div className="mt-8 mb-4 md:mb-0 md:mt-8 flex flex-col items-center gap-3 shrink-0 relative z-10">
           <button
-            onClick={onConfirmHierarchy}
+            onClick={onConfirm}
             disabled={loading}
             className={`px-8 py-3 rounded-full text-sm md:text-base font-bold shadow-lg shadow-sky-300/40
               transition-all hover:scale-[1.02] active:scale-95
@@ -231,9 +189,7 @@ export default function HierarchyScreen({
                   : "bg-gradient-to-r from-sky-400 to-cyan-400 text-white hover:from-sky-500 hover:to-cyan-500"
               }`}
           >
-            {loading
-              ? loadingMessage || "分析中..."
-              : "この階層でストーリーを読む"}
+            {loading ? loadingMessage || "分析中..." : "この階層でストーリーを読む"}
           </button>
         </div>
       </div>

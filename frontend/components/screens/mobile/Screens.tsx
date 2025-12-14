@@ -4,7 +4,7 @@ import StartScreen from "@/components/screens/mobile/StartScreen";
 import QuizScreen from "@/components/screens/mobile/QuizScreen";
 import ResolveScreen from "@/components/screens/mobile/ResolveScreen";
 import ResultScreen from "@/components/screens/mobile/ResultScreen";
-import MobileHierarchyScreen from "@/components/screens/mobile/HierarchyScreen";
+import HierarchyScreen from "@/components/screens/hierarchy";
 import { OOX_STEPS } from "@/constants/steps";
 import { QUESTIONS } from "@/constants/questions";
 import type { FunctionCode } from "@/types/oox";
@@ -68,7 +68,7 @@ export default function MobileScreens({ oox }: Props) {
 
   if (step === OOX_STEPS.HIERARCHY && calculateResult)
     return (
-      <MobileHierarchyScreen
+      <HierarchyScreen
         calculateResult={calculateResult}
         tierMap={tierMap}
         loading={loading}

@@ -1,17 +1,6 @@
-// components/screens/mobile/HierarchyScreen.tsx
 "use client";
 
-import { useMemo, useState } from "react";
-import { FunctionCode, CalculateResponse, Tier } from "@/types/oox";
-
-type Props = {
-  calculateResult: CalculateResponse;
-  tierMap: Partial<Record<FunctionCode, Tier>>;
-  loading: boolean;
-  loadingMessage: string;
-  onUpdateTier: (func: FunctionCode, tier: Tier) => void;
-  onConfirmHierarchy: () => void;
-};
+import { HierarchyViewProps } from "./index";
 
 const TIER_LABELS: Record<string, string> = {
   Dominant: "王",
@@ -20,42 +9,22 @@ const TIER_LABELS: Record<string, string> = {
   Low: "迷",
 };
 
-export default function MobileHierarchyScreen({
-  calculateResult,
+export default function HierarchyMobile({
+  finalOrder,
+  healthStatus,
   tierMap,
+  selected,
+  onSelect,
+  onConfirm,
   loading,
   loadingMessage,
-  onConfirmHierarchy,
-}: Props) {
-  // order をフラットにして 8 つの心理機能を取得
-  const finalOrder = useMemo(
-    () => (calculateResult.order.flat() as FunctionCode[]).slice(0, 8),
-    [calculateResult.order]
-  );
-
-  // healthStatus を計算（useOoX と同じロジック）
-  const healthStatus = useMemo(() => {
-    const hs: Record<FunctionCode, "O" | "o" | "x"> = {} as Record<
-      FunctionCode,
-      "O" | "o" | "x"
-    >;
-    finalOrder.forEach((func, index) => {
-      hs[func] = index % 3 === 0 ? "O" : index % 3 === 1 ? "o" : "x";
-    });
-    return hs;
-  }, [finalOrder]);
-
-  const [selected, setSelected] = useState<FunctionCode | null>(
-    finalOrder[0] ?? null
-  );
-
+}: HierarchyViewProps) {
   const selectedTier = selected ? tierMap[selected] : null;
   const selectedTierLabel = selectedTier
     ? TIER_LABELS[selectedTier] ?? selectedTier
     : null;
   const selectedHealth = selected ? healthStatus[selected] : null;
 
-  // 並びは order に合わせる（＝ユーザーが確定した最終順）
   const list = finalOrder;
 
   return (
@@ -83,7 +52,7 @@ export default function MobileHierarchyScreen({
             <button
               key={fn}
               type="button"
-              onClick={() => setSelected(fn)}
+              onClick={() => onSelect(fn)}
               className={[
                 "w-full rounded-xl border px-4 py-4 text-left",
                 isActive ? "border-black" : "border-gray-200",
@@ -142,7 +111,7 @@ export default function MobileHierarchyScreen({
               <button
                 type="button"
                 disabled={loading}
-                onClick={onConfirmHierarchy}
+                onClick={onConfirm}
                 className="mt-2 w-full rounded-xl border border-black px-4 py-3 text-sm font-semibold disabled:opacity-50"
               >
                 {loading ? loadingMessage : "この階層で確定する"}
