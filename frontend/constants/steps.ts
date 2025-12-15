@@ -4,4 +4,5 @@ export const OOX_STEPS = {
   RESOLVE: "resolve",
   HIERARCHY: "hierarchy",
   RESULT: "result",
+  WORLD: "world",
 } as const;
