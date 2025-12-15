@@ -351,6 +351,10 @@ export const useOoX = () => {
     }
   };
 
+  const handleGoToWorld = () => {
+    setStep(OOX_STEPS.WORLD);
+  };
+
   const handleRestart = () => {
     setStep(OOX_STEPS.START);
     setAnswers({});
@@ -383,6 +387,7 @@ export const useOoX = () => {
     handleUpdateTier,
     handleConfirmHierarchy,
     handleDescribe,
+    handleGoToWorld,
     handleRestart,
   };
 };

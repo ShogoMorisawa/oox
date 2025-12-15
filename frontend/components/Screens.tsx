@@ -6,6 +6,7 @@ import QuizScreen from "@/components/screens/quiz";
 import ResolveScreen from "@/components/screens/resolve";
 import HierarchyScreen from "@/components/screens/hierarchy";
 import ResultScreen from "@/components/screens/result";
+import WorldScreen from "@/components/screens/world";
 import { OOX_STEPS } from "@/constants/steps";
 import type { FunctionCode } from "@/types/oox";
 
@@ -32,6 +33,7 @@ export default function Screens() {
     handleUpdateTier,
     handleConfirmHierarchy,
     handleDescribe,
+    handleGoToWorld,
     handleRestart,
   } = oox;
 
@@ -86,9 +88,13 @@ export default function Screens() {
       <ResultScreen
         calculateResult={calculateResult}
         describeResult={describeResult}
-        onRestart={handleRestart}
+        onGoToWorld={handleGoToWorld}
       />
     );
+  }
+
+  if (step === OOX_STEPS.WORLD) {
+    return <WorldScreen />;
   }
 
   return null;

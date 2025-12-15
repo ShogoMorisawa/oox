@@ -6,7 +6,7 @@ import { ResultViewProps } from "./index";
 
 export default function ResultMobile({
   describeResult,
-  onRestart,
+  onGoToWorld,
 }: ResultViewProps) {
   return (
     <div
@@ -54,7 +54,7 @@ export default function ResultMobile({
         </div>
 
         <button
-          onClick={onRestart}
+          onClick={onGoToWorld}
           className="relative w-64 h-14 transition-transform hover:scale-105 active:scale-95"
         >
           <Image

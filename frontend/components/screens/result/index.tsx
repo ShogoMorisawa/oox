@@ -8,13 +8,13 @@ import { CalculateResponse, DescribeResponse } from "@/types/oox";
 type Props = {
   calculateResult: CalculateResponse;
   describeResult: DescribeResponse;
-  onRestart: () => void;
+  onGoToWorld: () => void;
 };
 
 export type ResultViewProps = {
   calculateResult: CalculateResponse;
   describeResult: DescribeResponse;
-  onRestart: () => void;
+  onGoToWorld: () => void;
 };
 
 export default function ResultContainer(props: Props) {
