@@ -3,7 +3,7 @@
 import StartScreen from "@/components/screens/start";
 import QuizScreen from "@/components/screens/quiz";
 import ResolveScreen from "@/components/screens/resolve";
-import ResultScreen from "@/components/screens/mobile/ResultScreen";
+import ResultScreen from "@/components/screens/result";
 import HierarchyScreen from "@/components/screens/hierarchy";
 import { OOX_STEPS } from "@/constants/steps";
 import { QUESTIONS } from "@/constants/questions";

@@ -4,7 +4,7 @@ import StartScreen from "@/components/screens/start";
 import QuizScreen from "@/components/screens/quiz";
 import ResolveScreen from "@/components/screens/resolve";
 import HierarchyScreen from "@/components/screens/hierarchy";
-import ResultScreen from "@/components/screens/pc/ResultScreen";
+import ResultScreen from "@/components/screens/result";
 import { useOoX } from "@/hooks/useOoX";
 import { FunctionCode } from "@/types/oox";
 import { OOX_STEPS } from "@/constants/steps";
