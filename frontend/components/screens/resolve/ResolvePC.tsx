@@ -1,138 +1,28 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
 import Image from "next/image";
-import { Quicksand } from "next/font/google";
-import { FunctionCode, CalculateResponse } from "@/types/oox";
 
-type Props = {
-  calculateResult: CalculateResponse;
-  conflictBlock: FunctionCode[];
-  resolvedBlock: FunctionCode[];
-  onSelectOrder: (func: FunctionCode) => void;
-  onReset: () => void;
-  onConfirm: () => void;
-  onDescribe: () => void;
-};
+import { ResolveViewProps } from "./index";
 
-const quicksand = Quicksand({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const SLOT_COUNT = 8;
-
-export default function ResolveScreen({
-  calculateResult,
-  conflictBlock,
-  resolvedBlock,
+export default function ResolvePC({
+  remainingFuncs,
+  slots,
+  isSlotInCurrentBlock,
+  allDecided,
   onSelectOrder,
   onReset,
   onConfirm,
-  onDescribe,
-}: Props) {
-  const targetBlock =
-    conflictBlock.length > 0
-      ? conflictBlock
-      : (calculateResult.order.find((el) => Array.isArray(el)) as
-          | FunctionCode[]
-          | undefined);
-
-  // 全体の順位構造を8スロットに配置（Hooksは条件分岐の前に配置）
-  const slots: (FunctionCode | null)[] = useMemo(() => {
-    const arr: (FunctionCode | null)[] = Array(SLOT_COUNT).fill(null);
-    let slotIndex = 0;
-
-    for (const element of calculateResult.order) {
-      if (slotIndex >= SLOT_COUNT) break;
-
-      if (typeof element === "string") {
-        // 確定済みの要素（例: "Ni", "Ti"）
-        arr[slotIndex] = element;
-        slotIndex++;
-      } else if (Array.isArray(element)) {
-        // 葛藤ブロック（例: ["Ne", "Si", "Se"]）
-        const block = element as FunctionCode[];
-        const isCurrentBlock = targetBlock && block === targetBlock;
-
-        if (isCurrentBlock) {
-          // 現在解決中のブロック: resolvedBlockの内容を配置
-          for (let i = 0; i < block.length && slotIndex < SLOT_COUNT; i++) {
-            arr[slotIndex] = resolvedBlock[i] ?? null;
-            slotIndex++;
-          }
-        } else {
-          // 未解決のブロック: 空欄のままスロットを進める
-          slotIndex += block.length;
-        }
-      }
-    }
-
-    return arr;
-  }, [calculateResult.order, targetBlock, resolvedBlock]);
-
-  // 選択可能な残りの関数コード（targetBlockからresolvedBlockを除いたもの）
-  const remainingFuncs = useMemo(() => {
-    if (!targetBlock) return [];
-    return targetBlock.filter((f) => !resolvedBlock.includes(f));
-  }, [targetBlock, resolvedBlock]);
-
-  // 各スロットが現在解決中のブロック内かどうかを判定
-  const isSlotInCurrentBlock = useMemo(() => {
-    const result: boolean[] = Array(SLOT_COUNT).fill(false);
-    let currentSlotIndex = 0;
-
-    for (const element of calculateResult.order) {
-      if (currentSlotIndex >= SLOT_COUNT) break;
-
-      if (typeof element === "string") {
-        currentSlotIndex++;
-      } else if (Array.isArray(element)) {
-        const block = element as FunctionCode[];
-        const isCurrentBlock = targetBlock && block === targetBlock;
-        const blockLength = block.length;
-
-        if (isCurrentBlock) {
-          for (
-            let i = 0;
-            i < blockLength && currentSlotIndex + i < SLOT_COUNT;
-            i++
-          ) {
-            result[currentSlotIndex + i] = true;
-          }
-        }
-        currentSlotIndex += blockLength;
-      }
-    }
-
-    return result;
-  }, [calculateResult.order, targetBlock]);
-
-  const allDecided = remainingFuncs.length === 0;
-
-  // もしブロックが見つからなければ次へ進む
-  useEffect(() => {
-    if (!targetBlock) {
-      onDescribe();
-    }
-  }, [targetBlock, onDescribe]);
-
-  if (!targetBlock) {
-    return <div className="p-10 text-white">Loading...</div>;
-  }
-
+  quicksandClassName,
+}: ResolveViewProps) {
   return (
     <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center py-10">
-      {/* 背景 */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat pointer-events-none"
         style={{ backgroundImage: "url(/images/oox_background.png)" }}
       />
       <div className="absolute inset-0 bg-white/20 pointer-events-none" />
 
-      {/* コンテンツ */}
       <div className="relative z-10 w-full max-w-5xl px-4 md:px-8">
-        {/* ヘッダー */}
         <div className="text-center mb-8">
           <p className="text-xs font-semibold tracking-[0.25em] text-sky-500 uppercase mb-2">
             Resolve Conflict
@@ -147,9 +37,7 @@ export default function ResolveScreen({
           </p>
         </div>
 
-        {/* メイン 3 カラムレイアウト */}
         <div className="grid md:grid-cols-[1.25fr_auto_1.4fr] gap-4 md:gap-8 items-center">
-          {/* 左：カード（葛藤中の細胞たち） */}
           <div className="flex flex-col gap-3">
             <p className="text-xs md:text-sm font-medium text-slate-600 mb-1">
               迷っている細胞たち
@@ -175,7 +63,6 @@ export default function ResolveScreen({
                     active:scale-95
                   `}
                 >
-                  {/* カード背景 */}
                   <Image
                     src="/images/oox_quiz_choice-lightBlue.png"
                     alt="Function card"
@@ -184,10 +71,9 @@ export default function ResolveScreen({
                   />
                   <div className="absolute inset-0 bg-sky-500/10 mix-blend-overlay" />
 
-                  {/* ラベル */}
                   <div className="relative z-10 h-full flex flex-col justify-center items-center px-4 text-slate-700">
                     <span
-                      className={`text-xs md:text-sm font-semibold mb-1 tracking-wide ${quicksand.className}`}
+                      className={`text-xs md:text-sm font-semibold mb-1 tracking-wide ${quicksandClassName}`}
                     >
                       {func}
                     </span>
@@ -200,24 +86,20 @@ export default function ResolveScreen({
             </div>
           </div>
 
-          {/* 中央：スロット（1〜8位） */}
           <div className="flex flex-col items-center gap-3">
             <p className="text-xs text-slate-500 mb-1">あなたの中の順位</p>
             <div className="flex flex-col items-center gap-2">
               {slots.map((slot, i) => (
                 <div key={i} className="relative w-16 h-16 md:w-18 md:h-18">
-                  {/* バブル背景 */}
                   <Image
                     src="/images/oox_resolve_bubble.png"
                     alt={`Rank ${i + 1} slot`}
                     fill
                     className="object-contain opacity-90 drop-shadow-sm"
                   />
-                  {/* 順位ラベル */}
                   <div className="absolute -left-7 top-1/2 -translate-y-1/2 text-[11px] text-slate-500 font-mono">
                     {i + 1}
                   </div>
-                  {/* 中身 */}
                   {slot ? (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <span className="text-xs font-semibold text-sky-800">
@@ -234,20 +116,17 @@ export default function ResolveScreen({
             </div>
           </div>
 
-          {/* 右：ぐるぐるバブル */}
           <div className="flex flex-col items-center gap-4">
             <p className="text-xs md:text-sm text-slate-600 mb-1">
               バブルの中で、まだ順番待ちの細胞たち
             </p>
             <div className="relative w-52 h-52 md:w-64 md:h-64 flex items-center justify-center">
-              {/* 大きなバブル */}
               <Image
                 src="/images/oox_resolve_bubble.png"
                 alt="Conflict bubble"
                 fill
                 className="object-contain opacity-90 drop-shadow-lg"
               />
-              {/* 中のセルたち */}
               {remainingFuncs.length > 0 ? (
                 <div className="absolute inset-8 flex items-center justify-center">
                   <div className="relative w-full h-full animate-[spin_16s_linear_infinite]">
@@ -286,7 +165,6 @@ export default function ResolveScreen({
           </div>
         </div>
 
-        {/* ボタン行 */}
         <div className="mt-8 flex flex-col md:flex-row gap-3 md:gap-4 justify-end">
           <button
             onClick={onReset}
