@@ -1,72 +1,87 @@
 "use client";
 
+import Image from "next/image";
+
 import { ResultViewProps } from "./index";
 
 export default function ResultPC({
-  calculateResult,
   describeResult,
   onRestart,
 }: ResultViewProps) {
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-6 font-sans">
-      <div className="max-w-2xl w-full bg-gray-800 rounded-3xl shadow-2xl overflow-hidden border border-gray-700">
-        <div className="h-32 bg-gradient-to-r from-indigo-900 to-purple-900 flex items-center justify-center">
-          <h1 className="text-3xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-pink-200">
-            OoX MIRROR
+    <div
+      className="min-h-screen flex items-center justify-center px-6 py-12 bg-cover bg-center"
+      style={{ backgroundImage: "url('/images/oox_background.png')" }}
+    >
+      {/* アイコン */}
+      <div className="w-full max-w-3xl flex flex-col items-center gap-10">
+        <div className="relative flex items-center justify-center w-72 h-72">
+          <div className="absolute inset-0 bg-white/30 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute inset-[-24px] rounded-full border border-white/20 blur-[1px]" />
+          <div className="absolute inset-[-12px] rounded-full border border-white/40 blur-[0.5px]" />
+          <div className="absolute inset-0 rounded-full shadow-[0_0_40px_rgba(255,255,255,0.8)]" />
+
+          <div className="relative z-10 w-full h-full rounded-full overflow-hidden">
+            <Image
+              src="/images/oox_start_cell-red.png"
+              alt="Your Archetype"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
+        </div>
+
+        {/* タイトル */}
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-wide text-sky-900 drop-shadow-sm">
+            {describeResult.title}
           </h1>
         </div>
 
-        <div className="p-8 space-y-8">
-          <div className="text-center">
-            <p className="text-gray-400 text-sm mb-2 uppercase tracking-widest">
-              Archetype
-            </p>
-            <h2 className="text-4xl font-extrabold text-white mb-4">
-              {describeResult.title}
-            </h2>
-            <div className="w-16 h-1 bg-blue-500 mx-auto rounded-full"></div>
-          </div>
-
-          <div className="prose prose-invert prose-lg mx-auto leading-relaxed text-gray-300">
-            <p className="whitespace-pre-wrap">{describeResult.description}</p>
-          </div>
-
-          <div className="bg-gray-900 rounded-xl p-6 mt-6">
-            <h3 className="text-sm font-bold text-gray-500 mb-4 uppercase">
-              Logic Structure
-            </h3>
-            <div className="flex flex-wrap gap-2 justify-center">
-              {calculateResult.order.map((el, i) => (
-                <div key={i} className="flex flex-col items-center">
-                  <div
-                    className={`
-                      w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm mb-1
-                      ${
-                        i < 2
-                          ? "bg-yellow-500 text-black shadow-lg shadow-yellow-500/50"
-                          : i < 4
-                          ? "bg-blue-600 text-white"
-                          : i < 6
-                          ? "bg-gray-600 text-gray-200"
-                          : "bg-gray-800 text-gray-500 border border-gray-700"
-                      }
-                    `}
-                  >
-                    {Array.isArray(el) ? "?" : el}
-                  </div>
-                  <span className="text-xs text-gray-500">{i + 1}</span>
-                </div>
-              ))}
+        {/* 説明（長文対応：中だけスクロール） */}
+        <div className="w-full max-w-2xl">
+          <div className="relative rounded-[28px] border border-white/40 bg-white/35 backdrop-blur-xl shadow-[0_18px_60px_rgba(60,140,180,0.25)] overflow-hidden">
+            {/* 内側のハイライト（泡っぽい艶） */}
+            <div className="pointer-events-none absolute inset-0">
+              <div className="absolute -top-10 -left-10 w-56 h-56 rounded-full bg-white/35 blur-2xl" />
+              <div className="absolute top-6 left-6 w-20 h-20 rounded-full bg-white/25 blur-xl" />
+              <div className="absolute bottom-0 right-0 w-64 h-40 rounded-full bg-sky-200/20 blur-2xl" />
+              <div className="absolute inset-0 rounded-[28px] ring-1 ring-white/25" />
             </div>
-          </div>
 
-          <button
-            onClick={onRestart}
-            className="w-full py-4 rounded-xl font-bold text-lg bg-white text-gray-900 hover:bg-gray-200 transition-all"
-          >
-            もう一度鏡を覗く
-          </button>
+            {/* スクロール領域 */}
+            <div
+              className="relative z-10 px-8 py-7 text-sky-900 text-sm md:text-base leading-relaxed text-left max-h-[38vh] md:max-h-[34vh] overflow-y-auto"
+              style={{
+                WebkitMaskImage:
+                  "linear-gradient(to bottom, black 88%, transparent 100%)",
+                maskImage:
+                  "linear-gradient(to bottom, black 88%, transparent 100%)",
+              }}
+            >
+              <p className="whitespace-pre-wrap">
+                {describeResult.description}
+              </p>
+            </div>
+
+            {/* 下部フェードを補強（見た目用） */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-b from-transparent to-white/35" />
+          </div>
         </div>
+
+        {/* ボタン */}
+        <button
+          onClick={onRestart}
+          className="relative w-64 h-14 transition-transform hover:scale-105 active:scale-95"
+        >
+          <Image
+            src="/images/oox_result_button-with-letter.png"
+            alt="Go to World"
+            fill
+            className="object-contain"
+          />
+        </button>
       </div>
     </div>
   );

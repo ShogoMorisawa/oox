@@ -25,16 +25,6 @@ type Match = {
   loser: FunctionCode;
 };
 
-// ... (findChoice, toHealthStatus 関数は変更なし)
-function findChoice(
-  questions: Question[],
-  questionId: string,
-  choiceId: ChoiceId
-): Choice | undefined {
-  const q = questions.find((q) => q.id === questionId);
-  return q?.choices.find((c) => c.id === choiceId);
-}
-
 function toHealthStatus(sum: number, count: number): "O" | "o" | "x" {
   if (count <= 0) return "o";
   const ratio = sum / count;
