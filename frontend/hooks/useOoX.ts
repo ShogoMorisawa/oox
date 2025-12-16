@@ -351,8 +351,48 @@ export const useOoX = () => {
     }
   };
 
-  const handleGoToWorld = () => {
-    setStep(OOX_STEPS.WORLD);
+  const handleGoToWorld = async () => {
+    if (!calculateResult || !describeResult) return;
+
+    setLoading(true);
+    setLoadingMessage("あなたの存在を世界に刻んでいます...");
+
+    try {
+      const finalOrder = calculateResult.order.flat() as FunctionCode[];
+      const dominant = finalOrder[0]; // 第1機能
+      const second = finalOrder[1]; // 第2機能（これが生息エリアを決める！）
+
+      // DBへ保存
+      const { error } = await supabase.from("user_results").insert({
+        // ▼ 追加: 生の回答データ
+        answers: answers,
+
+        function_order: finalOrder,
+        tier_map: tierMap,
+        health_status: calculateResult.health,
+
+        // ▼ 追加: エリア決定用の第2機能
+        dominant_function: dominant,
+        second_function: second,
+
+        title: describeResult.title,
+        description: describeResult.description,
+
+        // ▼ 仮のアイコンURL（後でロジックを入れるならここを変える）
+        icon_url: "/images/oox_start_cell-red.png",
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      setStep(OOX_STEPS.WORLD);
+    } catch (e) {
+      console.error("Save Error:", e);
+      alert("データの保存に失敗しました。");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRestart = () => {
