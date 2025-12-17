@@ -15,7 +15,7 @@ import {
 
 import { OOX_STEPS } from "@/constants/steps";
 import { OOX_TIER } from "@/constants/tier";
-import { API_BASE_URL } from "@/constants/api";
+import { API_BASE_URL, POLL_INTERVAL } from "@/constants/api";
 
 type ChoiceId = Choice["id"]; // "A" | "B"
 
