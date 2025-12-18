@@ -339,6 +339,50 @@ export const useOoX = () => {
     }
   };
 
+  const saveToSupabase = async (
+    calcRes: CalculateResponse,
+    descRes: DescribeResponse,
+    currentTierMap: Partial<Record<FunctionCode, Tier>>
+  ) => {
+    try {
+      const finalOrder = calcRes.order.flat() as FunctionCode[];
+      const dominant = finalOrder[0];
+      const second = finalOrder[1];
+
+      // TierMapの補完（Stateが空の場合のデフォルト値適用）
+      const finalTierMap: Record<string, Tier> = {};
+      finalOrder.forEach((func, index) => {
+        if (currentTierMap[func]) {
+          finalTierMap[func] = currentTierMap[func]!;
+        } else {
+          if (index < 2) finalTierMap[func] = OOX_TIER.DOMINANT;
+          else if (index < 4) finalTierMap[func] = OOX_TIER.HIGH;
+          else if (index < 6) finalTierMap[func] = OOX_TIER.MIDDLE;
+          else finalTierMap[func] = OOX_TIER.LOW;
+        }
+      });
+
+      // DBへ保存
+      const { error } = await supabase.from("user_results").insert({
+        answers: answers,
+        function_order: finalOrder,
+        tier_map: finalTierMap,
+        health_status: calcRes.health,
+        dominant_function: dominant,
+        second_function: second,
+        title: descRes.title,
+        description: descRes.description,
+        icon_url: "/images/oox_start_cell-red.png", // アイコンロジックがあればここで分岐
+      });
+
+      if (error) throw error;
+      console.log("Result saved to Supabase successfully!");
+    } catch (e) {
+      console.error("Auto Save Error:", e);
+      // 自動保存失敗時はアラートを出さず、ログだけ残すか、サイレントに再試行するなどがスマート
+    }
+  };
+
   const checkPollJobStatus = async (jobId: string) => {
     try {
       const url = `${API_BASE_URL}/api/describe/status/${jobId}`;
@@ -355,9 +399,15 @@ export const useOoX = () => {
       console.log(`Job Status: ${data.status}`);
 
       if (data.status === "completed") {
-        setDescribeResult(data.data as DescribeResponse);
+        const resultData = data.data as DescribeResponse;
+
+        setDescribeResult(resultData);
         setStep(OOX_STEPS.RESULT);
         setLoading(false);
+
+        if (calculateResult) {
+          await saveToSupabase(calculateResult, resultData, tierMap);
+        }
       } else if (data.status === "failed") {
         throw new Error(data.error || "分析に失敗しました");
       } else {
@@ -372,48 +422,8 @@ export const useOoX = () => {
     }
   };
 
-  const handleGoToWorld = async () => {
-    if (!calculateResult || !describeResult) return;
-
-    setLoading(true);
-    setLoadingMessage("あなたの存在を世界に刻んでいます...");
-
-    try {
-      const finalOrder = calculateResult.order.flat() as FunctionCode[];
-      const dominant = finalOrder[0]; // 第1機能
-      const second = finalOrder[1]; // 第2機能（これが生息エリアを決める！）
-
-      // DBへ保存
-      const { error } = await supabase.from("user_results").insert({
-        // ▼ 追加: 生の回答データ
-        answers: answers,
-
-        function_order: finalOrder,
-        tier_map: tierMap,
-        health_status: calculateResult.health,
-
-        // ▼ 追加: エリア決定用の第2機能
-        dominant_function: dominant,
-        second_function: second,
-
-        title: describeResult.title,
-        description: describeResult.description,
-
-        // ▼ 仮のアイコンURL（後でロジックを入れるならここを変える）
-        icon_url: "/images/oox_start_cell-red.png",
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      setStep(OOX_STEPS.WORLD);
-    } catch (e) {
-      console.error("Save Error:", e);
-      alert("データの保存に失敗しました。");
-    } finally {
-      setLoading(false);
-    }
+  const handleGoToWorld = () => {
+    setStep(OOX_STEPS.WORLD);
   };
 
   const handleRestart = () => {
