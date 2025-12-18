@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 
-import { WORLD_SLOTS } from "@/constants/world_slots";
 import type { FunctionCode, WorldUserResult } from "@/types/oox";
 
 const FUNC_COLORS: Record<FunctionCode, string> = {
@@ -20,6 +19,22 @@ const FUNC_COLORS: Record<FunctionCode, string> = {
 type Props = {
   users?: WorldUserResult[];
   loading?: boolean;
+};
+
+const BIOME_ZONES: Record<
+  FunctionCode,
+  { xMin: number; xMax: number; yMin: number; yMax: number }
+> = {
+  // 上段
+  Ne: { xMin: 5, xMax: 25, yMin: 5, yMax: 40 },
+  Si: { xMin: 30, xMax: 50, yMin: 10, yMax: 45 },
+  Se: { xMin: 55, xMax: 75, yMin: 5, yMax: 40 },
+  Fe: { xMin: 80, xMax: 95, yMin: 10, yMax: 50 },
+  // 下段
+  Ni: { xMin: 5, xMax: 25, yMin: 55, yMax: 90 },
+  Ti: { xMin: 30, xMax: 50, yMin: 55, yMax: 85 },
+  Fi: { xMin: 55, xMax: 75, yMin: 55, yMax: 90 },
+  Te: { xMin: 80, xMax: 95, yMin: 55, yMax: 85 },
 };
 
 export default function WorldPC({ users = [], loading = false }: Props) {
@@ -58,21 +73,25 @@ export default function WorldPC({ users = [], loading = false }: Props) {
       animationDelay: string;
     })[] = [];
 
-    (Object.keys(grouped) as FunctionCode[]).forEach((func) => {
-      const groupUsers = grouped[func];
-      const slots = WORLD_SLOTS[func];
+    sorted.forEach((user) => {
+      const zone =
+        BIOME_ZONES[user.second_function] ?? {
+          xMin: 45,
+          xMax: 55,
+          yMin: 45,
+          yMax: 55,
+        };
 
-      groupUsers.forEach((user, index) => {
-        const slot = slots[index] || slots[slots.length - 1];
-        const jitterX = (Math.random() - 0.5) * 2;
-        const jitterY = (Math.random() - 0.5) * 2;
+      const x =
+        zone.xMin + Math.random() * Math.max(zone.xMax - zone.xMin, 1);
+      const y =
+        zone.yMin + Math.random() * Math.max(zone.yMax - zone.yMin, 1);
 
-        result.push({
-          ...user,
-          x: slot.x + jitterX,
-          y: slot.y + jitterY,
-          animationDelay: `${Math.random() * 5}s`,
-        });
+      result.push({
+        ...user,
+        x,
+        y,
+        animationDelay: `${Math.random() * 5}s`,
       });
     });
 
