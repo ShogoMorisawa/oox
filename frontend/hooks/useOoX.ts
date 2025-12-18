@@ -253,7 +253,10 @@ export const useOoX = () => {
 
       const res = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
         body: JSON.stringify(requestBody),
       });
 
@@ -333,7 +336,10 @@ export const useOoX = () => {
 
       const res = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
         body: JSON.stringify(requestBody),
       });
 
@@ -358,7 +364,11 @@ export const useOoX = () => {
   const checkPollJobStatus = async (jobId: string) => {
     try {
       const url = `${API_BASE_URL}/api/describe/status/${jobId}`;
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        headers: {
+          Accept: "application/json",
+        },
+      });
       if (!res.ok) {
         if (res.status === 404) throw new Error("ジョブが見つかりません");
         throw new Error(`Status check failed: ${res.status}`);
