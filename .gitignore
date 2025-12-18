@@ -75,3 +75,5 @@ backend/Homestead.yaml
 backend/auth.json
 backend/.phpactor.json
 
+frontend/repomix-output.xml
+backend/repomix-output.xml
