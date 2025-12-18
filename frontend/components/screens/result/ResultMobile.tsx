@@ -25,6 +25,7 @@ export default function ResultMobile({
               src="/images/result_creature.png"
               alt="Your Archetype"
               fill
+              sizes="288px"
               className="object-contain"
               priority
             />
@@ -61,6 +62,7 @@ export default function ResultMobile({
             src="/images/oox_result_button-with-letter.png"
             alt="Go to World"
             fill
+            sizes="256px"
             className="object-contain"
           />
         </button>

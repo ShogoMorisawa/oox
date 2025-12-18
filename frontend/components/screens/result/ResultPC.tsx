@@ -79,6 +79,7 @@ export default function ResultPC({
             src="/images/oox_result_button-with-letter.png"
             alt="Go to World"
             fill
+            sizes="256px"
             className="object-contain"
           />
         </button>
