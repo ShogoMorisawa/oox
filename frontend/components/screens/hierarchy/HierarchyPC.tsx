@@ -18,12 +18,12 @@ const FUNCTION_TEXT: Record<FunctionCode, string> = {
 };
 
 const CELL_IMAGES = [
-  "/images/oox_hie_cell-night-red-left.png",
-  "/images/oox_hie_cell-night-lightBlue-right.png",
-  "/images/oox_hie_cell-lightBlue-right.png",
-  "/images/oox_hie_cell-red-left.png",
-  "/images/oox_hie_cell-citi-yellow-left.png",
-  "/images/oox_hie_cell-citi-green-right.png",
+  "/images/oox_hie_cell-king-red-left.png",
+  "/images/oox_hie_cell-king-lightBlue-right.png",
+  "/images/oox_hie_cell-knight-red-left.png",
+  "/images/oox_hie_cell-knight-lightBlue-right.png",
+  "/images/oox_hie_cell-citizen-yellow-left.png",
+  "/images/oox_hie_cell-citizen-green-right.png",
   "/images/oox_hie_cell-lost-left.png",
   "/images/oox_hie_cell-lost-right.png",
 ] as const;
