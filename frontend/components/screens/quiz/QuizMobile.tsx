@@ -75,7 +75,8 @@ export default function QuizMobile(props: QuizViewProps) {
                 onClick={() => onSelect(c.id)}
                 disabled={loading}
                 className={[
-                  "relative group aspect-square rounded-[2.5rem] flex flex-col items-center justify-center transition-all duration-300",
+                  "relative group rounded-[2.5rem] flex flex-col items-center justify-center transition-all duration-300",
+                  "min-h-[280px] h-[280px] w-full overflow-hidden",
                   isSelected ? "scale-105" : "hover:-translate-y-1",
                   loading ? "opacity-60" : "",
                 ].join(" ")}
@@ -98,14 +99,14 @@ export default function QuizMobile(props: QuizViewProps) {
                   />
                 </div>
 
-                <div className="relative z-10 flex flex-col items-center p-4">
+                <div className="relative z-10 flex flex-col items-center justify-center p-5 w-full h-full">
                   <span
-                    className={`text-xl font-bold mb-2 ${quicksandClassName} text-slate-700`}
+                    className={`text-xl font-bold mb-2 shrink-0 ${quicksandClassName} text-slate-700`}
                   >
                     {c.id}
                   </span>
 
-                  <span className="text-xs md:text-sm font-bold text-center leading-tight text-slate-700 whitespace-pre-line">
+                  <span className="text-xs md:text-sm font-bold text-center leading-relaxed text-slate-700 whitespace-pre-line break-words px-3 w-full">
                     {c.text}
                   </span>
                 </div>
@@ -158,13 +159,14 @@ export default function QuizMobile(props: QuizViewProps) {
           </div>
 
           <div className="relative z-10 w-32 h-40 flex items-end justify-center">
-            <div
+            {/* TODO: 進捗に応じて水が溜まるアニメーション（未実装のためコメントアウト） */}
+            {/* <div
               className="absolute bottom-2 w-[80%] bg-sky-300/40 rounded-b-[2rem] overflow-hidden transition-all duration-1000 ease-in-out"
               style={{ height: `${20 + progress * 70}%` }}
             >
               <div className="absolute top-0 left-0 w-[200%] h-4 bg-sky-200/50 animate-wave opacity-70" />
               <div className="w-full h-full bg-gradient-to-t from-sky-400/30 to-sky-100/10" />
-            </div>
+            </div> */}
             <div className="absolute inset-0 w-full h-full">
               <Image
                 src="/images/oox_start_pod.png"
