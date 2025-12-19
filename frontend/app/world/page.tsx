@@ -6,7 +6,6 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import WorldPC from "@/components/screens/world/WorldPC";
 import WorldMobile from "@/components/screens/world/WorldMobile";
 import type { WorldUserResult } from "@/types/oox";
-import Link from "next/link";
 
 export default function WorldPage() {
   const isMobile = useIsMobile();
@@ -54,16 +53,6 @@ export default function WorldPage() {
 
   return (
     <>
-      {/* 簡易ナビゲーション */}
-      <div className="fixed top-4 right-4 z-50">
-        <Link
-          href="/"
-          className="bg-white/80 backdrop-blur px-4 py-2 rounded-full shadow text-sm font-bold text-slate-600 hover:bg-white transition-colors"
-        >
-          TOP
-        </Link>
-      </div>
-
       {isMobile ? (
         <WorldMobile users={users} loading={loading} />
       ) : (
