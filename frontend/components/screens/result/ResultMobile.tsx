@@ -7,6 +7,7 @@ import { ResultViewProps } from "./index";
 export default function ResultPC({
   describeResult,
   onGoToWorld,
+  iconUrl,
 }: ResultViewProps) {
   return (
     <div
@@ -23,7 +24,7 @@ export default function ResultPC({
 
           <div className="relative z-10 w-full h-full rounded-full overflow-hidden">
             <Image
-              src="/images/oox_start_cell-red.png"
+              src={iconUrl}
               alt="Your Archetype"
               fill
               className="object-contain"
