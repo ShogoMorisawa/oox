@@ -4,6 +4,7 @@ import Image from "next/image";
 
 import { ResolveViewProps } from "./index";
 import { FUNCTION_TEXT } from "@/constants/cells";
+import { getCellImage } from "@/constants/icons";
 
 export default function ResolvePC({
   remainingFuncs,
@@ -105,7 +106,7 @@ export default function ResolvePC({
                     <div className="absolute inset-0 flex flex-col items-center justify-center px-1 gap-1">
                       <div className="relative w-8 h-8">
                         <Image
-                          src="/images/oox_start_cell-lightBlue.png"
+                          src={getCellImage(slot)}
                           alt="Cell"
                           fill
                           className="object-contain"
@@ -154,7 +155,7 @@ export default function ResolvePC({
                         >
                           <div className="relative w-10 h-10">
                             <Image
-                              src="/images/oox_start_cell-lightBlue.png"
+                              src={getCellImage(func)}
                               alt="Cell"
                               fill
                               className="object-contain"
