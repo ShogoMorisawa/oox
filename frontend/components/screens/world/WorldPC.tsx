@@ -5,17 +5,6 @@ import Image from "next/image";
 
 import type { FunctionCode, WorldUserResult } from "@/types/oox";
 
-const FUNC_COLORS: Record<FunctionCode, string> = {
-  Ni: "border-indigo-500 bg-indigo-50",
-  Se: "border-yellow-400 bg-yellow-50",
-  Ti: "border-slate-400 bg-slate-50",
-  Te: "border-red-500 bg-red-50",
-  Fi: "border-pink-400 bg-pink-50",
-  Fe: "border-cyan-400 bg-cyan-50",
-  Si: "border-amber-600 bg-amber-50",
-  Ne: "border-green-500 bg-green-50",
-};
-
 type Props = {
   users?: WorldUserResult[];
   loading?: boolean;
@@ -130,17 +119,14 @@ export default function WorldPC({ users = [], loading = false }: Props) {
 
       <div className="absolute inset-0 z-10 pointer-events-none">
         {placedUsers.map((user) => {
-          const colorClass =
-            FUNC_COLORS[user.dominant_function] || "border-gray-400 bg-white";
-
           return (
             <button
               key={user.id}
               onClick={() => setSelectedUser(user)}
-              className={`absolute w-16 h-16 md:w-20 md:h-20 rounded-full border-[4px] shadow-md
+              className={`absolute w-16 h-16 md:w-20 md:h-20 rounded-full  shadow-md
                 flex items-center justify-center transition-all duration-500 ease-out
                 hover:scale-125 hover:z-50 hover:shadow-xl active:scale-95
-                animate-float-slow pointer-events-auto ${colorClass}`}
+                animate-float-slow pointer-events-auto`}
               style={{
                 left: `${user.x}%`,
                 top: `${user.y}%`,
