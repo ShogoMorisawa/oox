@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { HierarchyViewProps } from "./index";
-import { Tier } from "@/types/oox";
+import { FunctionCode, Tier } from "@/types/oox";
 import { OOX_TIER } from "@/constants/tier";
 import { FUNCTION_TEXT } from "@/constants/cells";
 
@@ -20,10 +20,16 @@ const CELL_IMAGES = [
 ] as const;
 
 // 階層と左右位置から画像を決定するヘルパー
-const getCellImage = (tier: Tier, isLeft: boolean): string => {
+const getCellImage = (
+  tier: Tier,
+  func: FunctionCode,
+  isLeft: boolean
+): string => {
+  if (tier === OOX_TIER.DOMINANT) {
+    const side = isLeft ? "left" : "right";
+    return `/images/hie_cells/${side}_${func}_king.png`;
+  }
   switch (tier) {
-    case OOX_TIER.DOMINANT:
-      return isLeft ? CELL_IMAGES[0] : CELL_IMAGES[1];
     case OOX_TIER.HIGH:
       return isLeft ? CELL_IMAGES[2] : CELL_IMAGES[3];
     case OOX_TIER.MIDDLE:
@@ -135,7 +141,7 @@ export default function HierarchyMobile({
           // 左か右か (ジグザグ配置)
           const isLeft = index % 2 === 0;
           // 画像のパス
-          const imgSrc = getCellImage(tier, isLeft);
+          const imgSrc = getCellImage(tier, func, isLeft);
           const topY = getCellTop(index); // 計算した座標を使用
 
           return (
