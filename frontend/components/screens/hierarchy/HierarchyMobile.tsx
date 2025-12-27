@@ -3,43 +3,9 @@
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { HierarchyViewProps } from "./index";
-import { FunctionCode, Tier } from "@/types/oox";
 import { OOX_TIER } from "@/constants/tier";
 import { FUNCTION_TEXT } from "@/constants/cells";
-
-// ユーザー提供の画像配列
-const CELL_IMAGES = [
-  "/images/oox_hie_cell-king-red-left.png", // 0: 王・左
-  "/images/oox_hie_cell-king-lightBlue-right.png", // 1: 王・右
-  "/images/oox_hie_cell-knight-red-left.png", // 2: 騎・左
-  "/images/oox_hie_cell-knight-lightBlue-right.png", // 3: 騎・右
-  "/images/oox_hie_cell-citizen-yellow-left.png", // 4: 市・左
-  "/images/oox_hie_cell-citizen-green-right.png", // 5: 市・右
-  "/images/oox_hie_cell-lost-left.png", // 6: 迷・左
-  "/images/oox_hie_cell-lost-right.png", // 7: 迷・右
-] as const;
-
-// 階層と左右位置から画像を決定するヘルパー
-const getCellImage = (
-  tier: Tier,
-  func: FunctionCode,
-  isLeft: boolean
-): string => {
-  if (tier === OOX_TIER.DOMINANT) {
-    const side = isLeft ? "left" : "right";
-    return `/images/hie_cells/${side}_${func}_king.png`;
-  }
-  switch (tier) {
-    case OOX_TIER.HIGH:
-      return isLeft ? CELL_IMAGES[2] : CELL_IMAGES[3];
-    case OOX_TIER.MIDDLE:
-      return isLeft ? CELL_IMAGES[4] : CELL_IMAGES[5];
-    case OOX_TIER.LOW:
-      return isLeft ? CELL_IMAGES[6] : CELL_IMAGES[7];
-    default:
-      return CELL_IMAGES[6];
-  }
-};
+import { getHierarchyCellImage } from "@/constants/icons";
 
 // レイアウト定数
 const CELL_HEIGHT = 100; // 細胞の高さ領域
@@ -137,11 +103,11 @@ export default function HierarchyMobile({
       >
         {/* --- 細胞たち (Cells) --- */}
         {finalOrder.map((func, index) => {
-          const tier = tierMap[func];
+          const tier = tierMap[func] ?? OOX_TIER.LOW;
           // 左か右か (ジグザグ配置)
           const isLeft = index % 2 === 0;
           // 画像のパス
-          const imgSrc = getCellImage(tier, func, isLeft);
+          const imgSrc = getHierarchyCellImage(tier, func, isLeft);
           const topY = getCellTop(index); // 計算した座標を使用
 
           return (

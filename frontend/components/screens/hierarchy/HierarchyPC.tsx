@@ -6,7 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { HierarchyViewProps } from "./index";
 import { OOX_TIER } from "@/constants/tier";
 import { FUNCTION_TEXT } from "@/constants/cells";
-import { Tier } from "@/types/oox";
+import { getHierarchyCellImage } from "@/constants/icons";
+import { Tier, FunctionCode } from "@/types/oox";
 
 const TIER_INFO: { tier: Tier; title: string; subtitle: string }[] = [
   {
@@ -30,31 +31,6 @@ const TIER_INFO: { tier: Tier; title: string; subtitle: string }[] = [
     subtitle: "あまり働かない\n（今は休憩中…）",
   },
 ];
-
-// 画像パス定義
-const CELL_IMAGES = {
-  [OOX_TIER.DOMINANT]: [
-    "/images/oox_hie_cell-king-red-left.png",
-    "/images/oox_hie_cell-king-lightBlue-right.png",
-  ],
-  [OOX_TIER.HIGH]: [
-    "/images/oox_hie_cell-knight-red-left.png",
-    "/images/oox_hie_cell-knight-lightBlue-right.png",
-  ],
-  [OOX_TIER.MIDDLE]: [
-    "/images/oox_hie_cell-citizen-yellow-left.png",
-    "/images/oox_hie_cell-citizen-green-right.png",
-  ],
-  [OOX_TIER.LOW]: [
-    "/images/oox_hie_cell-lost-left.png",
-    "/images/oox_hie_cell-lost-right.png",
-  ],
-};
-
-const getCellImage = (tier: Tier, isEven: boolean): string => {
-  const images = CELL_IMAGES[tier] || CELL_IMAGES[OOX_TIER.LOW];
-  return isEven ? images[0] : images[1];
-};
 
 // PC版のレイアウト設定
 const CELL_HEIGHT = 90; // 細胞1つ分の高さ(px)
@@ -123,8 +99,12 @@ export default function HierarchyPC({
               {/* --- 細胞リスト --- */}
               {finalOrder.map((func, index) => {
                 const tier = tierMap[func] ?? OOX_TIER.LOW;
-                const isEven = index % 2 === 0; // 0, 2, 4... (左寄り)
-                const imgSrc = getCellImage(tier, isEven);
+                const isLeft = index % 2 === 0; // 0, 2, 4... (左寄り)
+                const imgSrc = getHierarchyCellImage(
+                  tier,
+                  func as FunctionCode,
+                  isLeft
+                );
                 const topY = getCellTop(index);
 
                 return (
@@ -141,7 +121,7 @@ export default function HierarchyPC({
                       <div
                         className={`absolute top-0 w-36 opacity-0 md:opacity-100 transition-opacity duration-500
                            ${
-                             isEven
+                             isLeft
                                ? "right-[65%] text-right"
                                : "left-[65%] text-left"
                            }
@@ -154,7 +134,7 @@ export default function HierarchyPC({
                             width={140}
                             height={80}
                             className={`object-contain opacity-60 ${
-                              isEven ? "" : "-scale-x-100"
+                              isLeft ? "" : "-scale-x-100"
                             }`}
                           />
                           <div className="absolute inset-0 flex flex-col justify-center px-4 pt-1">
@@ -168,7 +148,7 @@ export default function HierarchyPC({
                       {/* 画像 (AnimatePresenceで切り替えアニメ) */}
                       <div
                         className={`relative w-20 h-20 md:w-24 md:h-24 z-10 drop-shadow-lg transform ${
-                          isEven ? "-translate-x-8" : "translate-x-8"
+                          isLeft ? "-translate-x-8" : "translate-x-8"
                         }`}
                       >
                         <AnimatePresence mode="wait">
